@@ -1,6 +1,7 @@
 const mysql = require('mysql2')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken');
+
 const db = mysql.createConnection({
     host: process.env.DATABASE_HOST,
     user: process.env.DATABASE_USER,
@@ -9,6 +10,7 @@ const db = mysql.createConnection({
 })
 exports.register = (req, res) => {
     console.log(req.body.birthdate);
+    console.log(req.body);
 
     const { name, email, password, passwordConfirm, date } = req.body;
     db.query('SELECT email FROM users WHERE email = ?', [email], (error, result) => {
@@ -76,7 +78,13 @@ exports.login = (req, res) => {
                 maxAge: 24 * 60 * 60 * 1000
             });
 
-            return res.render('index');
+            db.query("SELECT * FROM novell ORDER BY name ASC", (err, data) => {
+                if (err) {
+                    console.error(err);
+                    return res.render('index', { data: [] }); // ส่ง array ว่าง
+                }
+                res.render('index', { data }); // ส่งข้อมูลไป EJS
+            });
         }
     });
 }
