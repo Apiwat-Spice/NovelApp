@@ -25,7 +25,8 @@ exports.register = (req, res) => {
                 message: "Password do not match"
             });
         }
-        bcrypt.hash(process.env.DATABASE_PASSWORD, 8, (err, hashedPassword) => {
+        //process.env.DATABASE_PASSWORD
+        bcrypt.hash(password, 8, (err, hashedPassword) => {
             if (err) throw err;
             db.query('INSERT INTO users SET ?', { username: name, email: email, password: hashedPassword, birthdate: date }, (error, result) => {
                 if (error) {
