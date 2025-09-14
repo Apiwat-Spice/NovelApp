@@ -36,26 +36,6 @@ db.connect((error) => {
 app.use('/', require('./routes/pages'))
 app.use('/auth', require('./routes/auth'))
 
-
-app.post("/addNovel", (req, res) => {
-  const values = [req.body.name, req.body.text, req.body.url];
-  const sql = "INSERT INTO novell (name, `text`, url) VALUES (?, ?, ?)";
-
-  db.query(sql, values, (err, result) => {
-    if (err) {
-      console.error(err);
-      return res.render("index", { data: [] }); 
-    }
-    // query ใหม่เพื่อดึงข้อมูลทั้งหมด
-    db.query("SELECT * FROM novell ORDER BY name ASC", (err, results) => {
-      if (err) {
-        console.error(err);
-        return res.render("index", { data: [] });
-      }
-      res.render("index", { data: results }); 
-    });
-  });
-});
 app.listen(3000, () => {
     console.log("Sever Started on Port 3000");
 })
