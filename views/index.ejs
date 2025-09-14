@@ -139,25 +139,26 @@
 
         </ul>
     </nav>
-    <div class="container">
-        <% if (data && data.length> 0) { %>
-            <% data.forEach(function(item) { %>
-                <div class="card">
-                    <img class="card-img" src="<%= item.url %>" alt="<%= item.name %>">
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            <%= item.name %>
-                        </h5>
-                        <p class="card-text">
-                            <%= item.text || '' %>
-                        </p>
-                        <a href="<%= item.url %>" class="card-btn" target="_blank">Go somewhere</a>
-                    </div>
-                </div>
-                <% }) %>
-                    <% } else { %>
-                        <p>No data found</p>
-                        <% } %>
+    <div class="container mt-4">
+  <div class="row">
+    <% if (data.length > 0) { %>
+      <% data.forEach(novel => { %>
+        <div class="col-md-4 mb-3">
+          <div class="card">
+            <img src="<%= novel.url %>" class="card-img-top" alt="<%= novel.name %>">
+            <div class="card-body">
+              <h5 class="card-title"><%= novel.name %></h5>
+              <p class="card-text"><%= novel.text %>...</p>
+              <a href="/read/<%= novel.idNovel1 %>" class="btn btn-primary">Read</a>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <p>No novels found.</p>
+    <% } %>
+  </div>
+</div>
     </div>
     <div class="container mt-4">
         <div class="p-5 mb-4 bg-light rounded-3">

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>
+        <%= novel.name %>
+    </title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <h2>
+        <%= novel.name %>
+    </h2>
+    <h3>Chapters</h3>
+    <ul>
+        <% if (chapters.length> 0) { %>
+            <% chapters.forEach(chap=> { %>
+                <li>
+                    Chapter <%= chap.chaptersNum %>:
+                        <a href="/chapter/<%= chap.idchapters %>">
+                            <%= chap.title %>
+                        </a>
+                </li>
+                <% }) %>
+                    <% } else { %>
+                        <p>No chapters yet.</p>
+                        <% } %>
+    </ul>
+    <a href="/novel/<%= novel.idNovel1 %>/addChapter" class="btn btn-secondary">Add Chapter</a>
+
+</body>
+
+</html>
