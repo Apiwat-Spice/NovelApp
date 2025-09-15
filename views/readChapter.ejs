@@ -1,4 +1,94 @@
-<h2><%= novelName %></h2>
-<h3>Chapter <%= chapter.chaptersNum %>: <%= chapter.title %></h3>
-<p><%= chapter.content %></p>
-<a href="/read/<%= chapter.idNovel1 %>">Back to chapter list</a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title><%= novelName %> - Chapter <%= chapter.chaptersNum %></title>
+  <style>
+    body.light { background: #fff; color: #000; }
+    body.dark { background: #121212; color: #e0e0e0; }
+    body.sepia { background: #f4ecd8; color: #5b4636; }
+
+    #controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    #content {
+      line-height: 1.6;
+      max-width: 700px;
+      margin: auto;
+    }
+
+    .btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .btn-primary { background: #007bff; color: #fff; }
+    .btn-secondary { background: #6c757d; color: #fff; }
+  </style>
+</head>
+<body class="light">
+  <header><h1><%= novelName %></h1></header>
+
+  <div id="reader">
+    <div id="controls">
+      <a href="/read/<%= chapter.idNovel1 %>" class="btn btn-primary">← Back</a>
+      <button class="btn btn-secondary" onclick="changeFontSize(1)">A+</button>
+      <button class="btn btn-secondary" onclick="changeFontSize(-1)">A-</button>
+      <button class="btn btn-secondary" onclick="setTheme('light')">Light</button>
+      <button class="btn btn-secondary" onclick="setTheme('dark')">Dark</button>
+      <button class="btn btn-secondary" onclick="setTheme('sepia')">Sepia</button>
+    </div>
+
+    <h2>Chapter <%= chapter.chaptersNum %>: <%= chapter.title %></h2>
+
+    <div id="content"><%= chapter.content %></div>
+
+    <div style="margin-top:20px; display:flex; justify-content:space-between;">
+      <% if (prevChapter) { %>
+        <a href="/chapter/<%= prevChapter %>" class="btn btn-secondary">⬅ Previous</a>
+      <% } else { %>
+        <span></span>
+      <% } %>
+
+      <% if (nextChapter) { %>
+        <a href="/chapter/<%= nextChapter %>" class="btn btn-secondary">Next ➡</a>
+      <% } else { %>
+        <span></span>
+      <% } %>
+    </div>
+  </div>
+
+  <script>
+    let fontSize = 18;
+
+    function changeFontSize(change) {
+      fontSize += change;
+      if (fontSize < 12) fontSize = 12;
+      document.getElementById("content").style.fontSize = fontSize + "px";
+      localStorage.setItem("fontSize", fontSize);
+    }
+
+    function setTheme(theme) {
+      document.body.className = theme;
+      localStorage.setItem("theme", theme);
+    }
+
+    window.onload = function() {
+      const savedFont = localStorage.getItem("fontSize");
+      const savedTheme = localStorage.getItem("theme");
+
+      if (savedFont) {
+        fontSize = parseInt(savedFont);
+        document.getElementById("content").style.fontSize = fontSize + "px";
+      }
+      if (savedTheme) {
+        document.body.className = savedTheme;
+      }
+    }
+  </script>
+</body>
+</html>
