@@ -3,6 +3,7 @@ const mysql = require('mysql2')
 const express = require("express")
 const router = express.Router();
 const { isLoggedIn } = require('../controllers/authMiddleware');
+const authController = require('../controllers/auth');
 
 const db = mysql.createConnection({
     host: process.env.DATABASE_HOST,
@@ -15,7 +16,7 @@ router.get('/',(req,res)=>{
     res.render('login', { message: '' ,user: req.user})
 })
 router.get('/index', isLoggedIn, (req, res) => {
-    res.render('index', { user: req.user });
+    res.render('index', { data: results, user: req.user });
 });
 router.get('/register',(req,res)=>{
     res.render('register', { message: '' })
@@ -26,15 +27,6 @@ router.get('/login',(req,res)=>{
 router.get('/addNovel',(req,res)=>{
     res.render('addNovel', { message: '' })
 })
-
-// router.get('/read/:id', (req, res) => {
-//   const id = req.params.id;
-//   db.query("SELECT * FROM novell WHERE idNovel1 = ?", [id], (err, results) => {
-//     if (err || results.length === 0) return res.send('Novel not found');
-//     res.render('readNovel', { novel: results[0] });
-//   });
-// });
-
 router.get('/novel/:id/addChapter', (req, res) => {
   const id = req.params.id;
   db.query("SELECT * FROM novell WHERE idNovel1 = ?", [id], (err, results) => {
@@ -60,7 +52,7 @@ router.get('/read/:id', (req, res) => {
     });
   });
 });
-
+router.get('/logout',authController.logout);
 router.get('/chapter/:id', (req, res) => {
   const chapterId = req.params.id;
 
@@ -77,15 +69,6 @@ router.get('/chapter/:id', (req, res) => {
   });
 });
 
-//has to be here
-router.post('/novel/:id/addChapter', (req, res) => {
-  const id = req.params.id;
-  const { title, content, chaptersNum } = req.body;
-  const sql = "INSERT INTO chapters (idNovel1, title, content, chaptersNum) VALUES (?, ?, ?, ?)";
-
-  db.query(sql, [id, title, content, chaptersNum || null], (err, result) => {
-    if (err) return res.send("Failed to add chapter");
-    res.redirect(`/read/${id}`);
-  });
-});
+router.post("/addNovel",authController.addNovel);
+router.post('/novel/:id/addChapter',authController.addChapter);
 module.exports = router;
