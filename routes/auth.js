@@ -5,8 +5,6 @@ const router = express.Router();
 
 router.post('/register',authController.register)
 router.post('/login',authController.login)
-
-
 router.post("/addNovel",authController.addNovel);
 
 module.exports = router;

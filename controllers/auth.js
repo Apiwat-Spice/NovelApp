@@ -9,9 +9,6 @@ const db = mysql.createConnection({
     database: process.env.DATABASE
 })
 exports.register = (req, res) => {
-    console.log(req.body.birthdate);
-    console.log(req.body);
-
     const { name, email, password, passwordConfirm, date } = req.body;
     db.query('SELECT email FROM users WHERE email = ?', [email], (error, result) => {
         if (error) {
@@ -74,32 +71,77 @@ exports.login = (req, res) => {
             // ส่ง token เก็บใน cookie
             res.cookie('jwt', token, {
                 httpOnly: true,
-                secure: false,
+                secure: true,
                 maxAge: 24 * 60 * 60 * 1000
             });
 
-            db.query("SELECT * FROM novell ORDER BY name ASC", (err, data) => {
+            db.query("SELECT * FROM novels ORDER BY title ASC", (err, data) => {
                 if (err) {
-                    console.error(err);
+                    console.log("error here :"+err);
                     return res.render('index', { data: [] }); // ส่ง array ว่าง
                 }
-                res.render('index', { data }); // ส่งข้อมูลไป EJS
+                console.log("no error");
+                res.redirect('/index'); // ส่งข้อมูลไป EJS
             });
         }
     });
 }
 
 exports.addNovel = (req, res) => {
-    const values = [req.body.name, req.body.text, req.body.url];
-    const sql = "INSERT INTO novell (name, `text`, url) VALUES (?, ?, ?)";
+//     CREATE TABLE novels ( --novel ใหม่
+//     id INT AUTO_INCREMENT PRIMARY KEY,           -- รหัสนิยาย
+//     title VARCHAR(100) NOT NULL,                 -- ชื่อนิยาย
+//     user_id INT NOT NULL,                      -- รหัสผู้แต่ง (FK)
+//     author_name VARCHAR(100) NOT NULL,           -- ชื่อผู้แต่งสำรอง
+//     category VARCHAR(50),                        -- หมวดหมู่
+//     cover_url VARCHAR(500),                       -- URL ปก
+//     description TEXT,                            -- คำบรรยาย
+//     content LONGTEXT,                            -- เนื้อหานิยาย
+//     is_adult BOOLEAN DEFAULT FALSE,              -- 18+ content
+//     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+//     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+//     FOREIGN KEY (user_id) REFERENCES users(id) -- FK เชื่อมกับ users
+// );
+    console.log(req.body);
+    const userId = req.user.id; // <-- เพิ่มตรงนี้
+    const {
+        novelname,
+        arthor,
+        category,
+        PicUrl,
+        Descriptions,
+        Novel_Content,
+        Check18Content
+    } = req.body;
+
+    const isAdult = Check18Content === 'on' ? 1 : 0;
+
+    // บังคับให้ login ก่อนถึงเพิ่ม novel:
+    if (!req.user) return res.redirect('/login');
+
+    const values = [
+        novelname,
+        userId,       // <-- แก้ตรงนี้
+        arthor,
+        category,
+        PicUrl,
+        Descriptions,
+        Novel_Content,
+        isAdult
+    ];
+
+    const sql = `
+        INSERT INTO novels 
+        (title, user_id, author_name, category, cover_url, description, content, is_adult)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `;
 
     db.query(sql, values, (err, result) => {
         if (err) {
             console.error(err);
             return res.render("index", { data: [] });
         }
-        // query ใหม่เพื่อดึงข้อมูลทั้งหมด
-        db.query("SELECT * FROM novell ORDER BY name ASC", (err, results) => {
+        db.query("SELECT * FROM novels ORDER BY title ASC", (err, results) => {
             if (err) {
                 console.error(err);
                 return res.render("index", { data: [] });
@@ -108,6 +150,7 @@ exports.addNovel = (req, res) => {
         });
     });
 }
+
 
 exports.addChapter = (req, res) => {
     console.log(req.body);
@@ -120,6 +163,7 @@ exports.addChapter = (req, res) => {
         res.redirect(`/read/${id}`);
     });
 }
+
 exports.logout = (req, res) => {
     res.clearCookie('jwt'); // เคลียร์ JWT cookie
     res.redirect('/login');

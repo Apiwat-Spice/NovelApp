@@ -1,5 +1,5 @@
 //npm init -y
-//npm i express mysql2 dotenv nodemon bcrypt ejs express-session
+//npm i express mysql2 dotenv nodemon bcrypt ejs 
 const express = require('express')//cookie-parser jsonwebtoken
 const mysql = require('mysql2')
 const dotenv = require('dotenv')
@@ -8,7 +8,6 @@ const cookieParser = require('cookie-parser');
 const { isLoggedIn } = require('./controllers/authMiddleware');
 
 dotenv.config()
-global.loggedIn = null
 const app = express()
 app.use(cookieParser());
 
