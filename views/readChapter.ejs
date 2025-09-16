@@ -3,7 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <title><%= novelName %> - Chapter <%= chapter.chapter_number %></title>
+    <title>
+        <%= novelName %> - Chapter <%= chapter.chapter_number %>
+    </title>
     <style>
         body.light {
             background: #fff;
@@ -54,7 +56,9 @@
 
 <body class="light">
     <header>
-        <h1><%= novelName %></h1>
+        <h1>
+            <%= novelName %>
+        </h1>
     </header>
 
     <div id="reader" class="container mt-4">
@@ -74,7 +78,8 @@
             </select>
         </div>
 
-        <h2>Chapter <%= chapter.chapter_number %>: <%= chapter.title %></h2>
+        <h2>Chapter <%= chapter.chapter_number %>: <%= chapter.title %>
+        </h2>
 
         <div id="content">
             <%= chapter.content %>
@@ -83,16 +88,42 @@
         <div class="d-flex justify-content-between mt-3">
             <% if (prevChapter) { %>
                 <a href="/chapter/<%= prevChapter %>" class="btn btn-secondary">⬅ Previous</a>
-            <% } else { %>
-                <span></span>
-            <% } %>
+                <% } else { %>
+                    <span></span>
+                    <% } %>
 
-            <% if (nextChapter) { %>
-                <a href="/chapter/<%= nextChapter %>" class="btn btn-secondary">Next ➡</a>
-            <% } else { %>
-                <span></span>
-            <% } %>
+                        <% if (nextChapter) { %>
+                            <a href="/chapter/<%= nextChapter %>" class="btn btn-secondary">Next ➡</a>
+                            <% } else { %>
+                                <span></span>
+                                <% } %>
         </div>
+
+        <hr>
+        <h3>Comments</h3>
+        <div>
+            <% if (comments.length===0) { %>
+                <p>No comments yet.</p>
+                <% } else { %>
+                    <% comments.forEach(c=> { %>
+                        <div>
+                            <strong>
+                                <%= c.username %>
+                            </strong>: <%= c.content %>
+                                <small>(<%= new Date(c.created_at).toLocaleString() %>)</small>
+                        </div>
+                        <% }) %>
+                            <% } %>
+        </div>
+
+        <% if (user) { %>
+            <form method="POST" action="/chapter/<%= chapter.chapter_id %>/comment">
+                <textarea name="content" rows="4" required></textarea>
+                <button type="submit">Post Comment</button>
+            </form>
+            <% } else { %>
+                <p><a href="/login">Login</a> to comment</p>
+                <% } %>
     </div>
 
     <script>
