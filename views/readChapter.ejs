@@ -2,193 +2,202 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <title>
-        <%= novelName %> - Chapter <%= chapter.chapter_number %>
-    </title>
-    <style>
-        body.light {
-            background: #fff;
-            color: #000;
-        }
+  <meta charset="UTF-8">
+  <title>
+    <%= novelName %> - Chapter <%= chapter.chapter_number %>
+  </title>
+  <style>
+    body.light {
+      background: #fff;
+      color: #000;
+    }
 
-        body.dark {
-            background: #121212;
-            color: #e0e0e0;
-        }
+    body.dark {
+      background: #121212;
+      color: #e0e0e0;
+    }
 
-        body.sepia {
-            background: #f4ecd8;
-            color: #5b4636;
-        }
+    body.sepia {
+      background: #f4ecd8;
+      color: #5b4636;
+    }
 
-        #controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
+    #controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
 
-        #content {
-            line-height: 1.6;
-            max-width: 700px;
-            margin: auto;
-            font-size: 18px;
-        }
+    #content {
+      line-height: 1.6;
+      max-width: 700px;
+      margin: auto;
+      font-size: 18px;
+    }
 
-        .btn {
-            padding: 6px 12px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
+    .btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
 
-        .btn-primary {
-            background: #007bff;
-            color: #fff;
-        }
+    .btn-primary {
+      background: #007bff;
+      color: #fff;
+    }
 
-        .btn-secondary {
-            background: #6c757d;
-            color: #fff;
-        }
+    .btn-secondary {
+      background: #6c757d;
+      color: #fff;
+    }
 
-        .comment-section {
-            border-top: 1px solid #ddd;
-            padding-top: 20px;
-        }
+    .comment-section {
+      border-top: 1px solid #ddd;
+      padding-top: 20px;
+    }
 
-        .comment-form textarea {
-            border-radius: 8px;
-            resize: none;
-        }
+    .comment-form textarea {
+      border-radius: 8px;
+      resize: none;
+    }
 
-        .comment-form button {
-            border-radius: 8px;
-            transition: all 0.2s ease-in-out;
-        }
+    .comment-form button {
+      border-radius: 8px;
+      transition: all 0.2s ease-in-out;
+    }
 
-        .comment-form button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-        }
+    .comment-form button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
 
-        .comment-section p {
-            font-size: 0.95rem;
-        }
-    </style>
+    .comment-section p {
+      font-size: 0.95rem;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    a:hover {
+      color: inherit;
+    }
+  </style>
 </head>
 
 <body class="light">
-    <header>
-        <h1>
-            <%= novelName %>
-        </h1>
-    </header>
+  <header>
+    <h1>
+      <%= novelName %>
+    </h1>
+  </header>
 
-    <div id="reader" class="container mt-4">
-        <div id="controls">
-            <a href="/read/<%= chapter.novel_id %>" class="btn btn-primary">← Back</a>
-            <button class="btn btn-secondary" onclick="changeFontSize(1)">A+</button>
-            <button class="btn btn-secondary" onclick="changeFontSize(-1)">A-</button>
-            <button class="btn btn-secondary" onclick="setTheme('light')">Light</button>
-            <button class="btn btn-secondary" onclick="setTheme('dark')">Dark</button>
-            <button class="btn btn-secondary" onclick="setTheme('sepia')">Sepia</button>
-            <select id="fontSelect" onchange="changeFont(this.value)">
-                <option value="serif">Serif</option>
-                <option value="sans-serif">Sans-Serif</option>
-                <option value="monospace">Monospace</option>
-                <option value="Georgia">Georgia</option>
-                <option value="Courier New">Courier New</option>
-            </select>
-        </div>
-
-        <h2>Chapter <%= chapter.chapter_number %>: <%= chapter.title %>
-        </h2>
-
-        <div id="content">
-            <%= chapter.content %>
-        </div>
-
-        <div class="d-flex justify-content-between mt-3">
-            <% if (prevChapter) { %>
-                <a href="/chapter/<%= prevChapter %>" class="btn btn-secondary">⬅ Previous</a>
-                <% } else { %>
-                    <span></span>
-                    <% } %>
-
-                        <% if (nextChapter) { %>
-                            <a href="/chapter/<%= nextChapter %>" class="btn btn-secondary">Next ➡</a>
-                            <% } else { %>
-                                <span></span>
-                                <% } %>
-        </div>
-
-        <hr>
-        <h3>Comments</h3>
-        <div>
-            <% if (comments.length===0) { %>
-                <p>No comments yet.</p>
-                <% } else { %>
-                    <% comments.forEach(c=> { %>
-                        <div>
-                            <strong>
-                                <%= c.username %>
-                            </strong>: <%= c.content %>
-                                <small>(<%= new Date(c.created_at).toLocaleString() %>)</small>
-                        </div>
-                        <% }) %>
-                            <% } %>
-        </div>
-
-        <div class="comment-section mt-4">
-            <% if (user) { %>
-                <form method="POST" action="/chapter/<%= chapter.chapter_id %>/comment" class="comment-form">
-                    <div class="mb-3">
-                        <textarea name="content" class="form-control" rows="4" placeholder="Write your comment..."
-                            required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Post Comment</button>
-                </form>
-                <% } else { %>
-                    <p class="text-muted">
-                        <a href="/login" class="text-decoration-none">Login</a> to comment.
-                    </p>
-                    <% } %>
-        </div>
+  <div id="reader" class="container mt-4">
+    <div id="controls">
+      <a href="/read/<%= chapter.novel_id %>" class="btn btn-primary">← Back</a>
+      <button class="btn btn-secondary" onclick="changeFontSize(1)">A+</button>
+      <button class="btn btn-secondary" onclick="changeFontSize(-1)">A-</button>
+      <button class="btn btn-secondary" onclick="setTheme('light')">Light</button>
+      <button class="btn btn-secondary" onclick="setTheme('dark')">Dark</button>
+      <button class="btn btn-secondary" onclick="setTheme('sepia')">Sepia</button>
+      <select id="fontSelect" onchange="changeFont(this.value)">
+        <option value="serif">Serif</option>
+        <option value="sans-serif">Sans-Serif</option>
+        <option value="monospace">Monospace</option>
+        <option value="Georgia">Georgia</option>
+        <option value="Courier New">Courier New</option>
+      </select>
     </div>
 
-    <script>
-        let fontSize = 18;
+    <h2>Chapter <%= chapter.chapter_number %>: <%= chapter.title %>
+    </h2>
 
-        function changeFontSize(change) {
-            fontSize += change;
-            if (fontSize < 12) fontSize = 12;
-            document.getElementById("content").style.fontSize = fontSize + "px";
-            localStorage.setItem("fontSize", fontSize);
-        }
+    <div id="content">
+      <%= chapter.content %>
+    </div>
 
-        function setTheme(theme) {
-            document.body.className = theme;
-            localStorage.setItem("theme", theme);
-        }
+    <div class="d-flex justify-content-between mt-3">
+      <% if (prevChapter) { %>
+      <a href="/chapter/<%= prevChapter %>" class="btn btn-secondary">⬅ Previous</a>
+      <% } else { %>
+      <span></span>
+      <% } %>
 
-        window.onload = function () {
-            const savedFont = localStorage.getItem("fontSize");
-            const savedTheme = localStorage.getItem("theme");
+      <% if (nextChapter) { %>
+      <a href="/chapter/<%= nextChapter %>" class="btn btn-secondary">Next ➡</a>
+      <% } else { %>
+      <span></span>
+      <% } %>
+    </div>
 
-            if (savedFont) {
-                fontSize = parseInt(savedFont);
-                document.getElementById("content").style.fontSize = fontSize + "px";
-            }
-            if (savedTheme) {
-                document.body.className = savedTheme;
-            }
-        }
+    <hr>
+    <h3>Comments</h3>
+    <div>
+      <% if (comments.length===0) { %>
+      <p>No comments yet.</p>
+      <% } else { %>
+      <% comments.forEach(c=> { %>
+      <div>
+        <strong>
+          <%= c.username %>
+        </strong>: <%= c.content %>
+        <small>(<%= new Date(c.created_at).toLocaleString() %>)</small>
+      </div>
+      <% }) %>
+      <% } %>
+    </div>
 
-        function changeFont(fontFamily) {
-            document.getElementById("content").style.fontFamily = fontFamily;
-        }
-    </script>
+    <div class="comment-section mt-4">
+      <% if (user) { %>
+      <form method="POST" action="/chapter/<%= chapter.chapter_id %>/comment" class="comment-form">
+        <div class="mb-3">
+          <textarea name="content" class="form-control" rows="4" placeholder="Write your comment..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Post Comment</button>
+      </form>
+      <% } else { %>
+      <p class="text-muted">
+        <a href="/login" class="text-decoration-none">Login</a> to comment.
+      </p>
+      <% } %>
+    </div>
+  </div>
+
+  <script>
+    let fontSize = 18;
+
+    function changeFontSize(change) {
+      fontSize += change;
+      if (fontSize < 12) fontSize = 12;
+      document.getElementById("content").style.fontSize = fontSize + "px";
+      localStorage.setItem("fontSize", fontSize);
+    }
+
+    function setTheme(theme) {
+      document.body.className = theme;
+      localStorage.setItem("theme", theme);
+    }
+
+    window.onload = function() {
+      const savedFont = localStorage.getItem("fontSize");
+      const savedTheme = localStorage.getItem("theme");
+
+      if (savedFont) {
+        fontSize = parseInt(savedFont);
+        document.getElementById("content").style.fontSize = fontSize + "px";
+      }
+      if (savedTheme) {
+        document.body.className = savedTheme;
+      }
+    }
+
+    function changeFont(fontFamily) {
+      document.getElementById("content").style.fontFamily = fontFamily;
+    }
+  </script>
 </body>
 
 </html>
