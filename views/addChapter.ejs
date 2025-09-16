@@ -1,16 +1,12 @@
-<h2>Add Chapter to "<%= novel.name %>"</h2>
-<form action="/novel/<%= novel.id %>/addChapter" method="POST">
-  <div>
+<h2>Add Chapter to "<%= novel.title %>"</h2>
+<form action="/novel/<%= novel.novel_id %>/addChapter" method="POST">
+  <div class="mb-3">
     <label>Chapter Number:</label>
-    <input type="number" name="chaptersNum">
+    <input type="number" name="chapter_number" class="form-control" required>
   </div>
-  <div>
-    <label>Title:</label>
-    <input type="text" name="title" required>
-  </div>
-  <div>
+  <div class="mb-3">
     <label>Content:</label>
-    <textarea name="content" rows="6" required></textarea>
+    <textarea name="content" rows="6" class="form-control" required></textarea>
   </div>
-  <button type="submit">Add Chapter</button>
+  <button type="submit" class="btn btn-success">Add Chapter</button>
 </form>

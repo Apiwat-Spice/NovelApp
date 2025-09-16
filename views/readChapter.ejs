@@ -1,11 +1,9 @@
-
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <title>
-        <%= novelName %> - Chapter <%= chapters.chapter_number%>
-    </title>
+    <title><%= novelName %> - Chapter <%= chapter.chapter_number %></title>
     <style>
         body.light {
             background: #fff;
@@ -32,6 +30,7 @@
             line-height: 1.6;
             max-width: 700px;
             margin: auto;
+            font-size: 18px;
         }
 
         .btn {
@@ -55,14 +54,12 @@
 
 <body class="light">
     <header>
-        <h1>
-            <%= novelName %>
-        </h1>
+        <h1><%= novelName %></h1>
     </header>
 
-    <div id="reader">
+    <div id="reader" class="container mt-4">
         <div id="controls">
-            <a href="/read/<%= chapters.id %>" class="btn btn-primary">← Back</a>
+            <a href="/read/<%= chapter.novel_id %>" class="btn btn-primary">← Back</a>
             <button class="btn btn-secondary" onclick="changeFontSize(1)">A+</button>
             <button class="btn btn-secondary" onclick="changeFontSize(-1)">A-</button>
             <button class="btn btn-secondary" onclick="setTheme('light')">Light</button>
@@ -74,67 +71,62 @@
                 <option value="monospace">Monospace</option>
                 <option value="Georgia">Georgia</option>
                 <option value="Courier New">Courier New</option>
-            </select>'
+            </select>
         </div>
 
-            <h2>Chapter <%= chapters.chapter_number %>: <%=  %>
-            </h2>
+        <h2>Chapter <%= chapter.chapter_number %>: <%= chapter.title %></h2>
 
-            <div id="content">
-                <%= chapters.content %>
-            </div>
-
-            <div style="margin-top:20px; display:flex; justify-content:space-between;">
-                <% if (prevChapter) { %>
-                    <a href="/chapter/<%= prevChapter %>" class="btn btn-secondary">⬅ Previous</a>
-                    <% } else { %>
-                        <span></span>
-                        <% } %>
-
-                            <% if (nextChapter) { %>
-                                <a href="/chapter/<%= nextChapter %>" class="btn btn-secondary">Next ➡</a>
-                                <% } else { %>
-                                    <span></span>
-                                    <% } %>
-            </div>
+        <div id="content">
+            <%= chapter.content %>
         </div>
-    
 
-        <script>
-            let fontSize = 18;
+        <div class="d-flex justify-content-between mt-3">
+            <% if (prevChapter) { %>
+                <a href="/chapter/<%= prevChapter %>" class="btn btn-secondary">⬅ Previous</a>
+            <% } else { %>
+                <span></span>
+            <% } %>
 
-            function changeFontSize(change) {
-                fontSize += change;
-                if (fontSize < 12) fontSize = 12;
+            <% if (nextChapter) { %>
+                <a href="/chapter/<%= nextChapter %>" class="btn btn-secondary">Next ➡</a>
+            <% } else { %>
+                <span></span>
+            <% } %>
+        </div>
+    </div>
+
+    <script>
+        let fontSize = 18;
+
+        function changeFontSize(change) {
+            fontSize += change;
+            if (fontSize < 12) fontSize = 12;
+            document.getElementById("content").style.fontSize = fontSize + "px";
+            localStorage.setItem("fontSize", fontSize);
+        }
+
+        function setTheme(theme) {
+            document.body.className = theme;
+            localStorage.setItem("theme", theme);
+        }
+
+        window.onload = function () {
+            const savedFont = localStorage.getItem("fontSize");
+            const savedTheme = localStorage.getItem("theme");
+
+            if (savedFont) {
+                fontSize = parseInt(savedFont);
                 document.getElementById("content").style.fontSize = fontSize + "px";
-                localStorage.setItem("fontSize", fontSize);
             }
-
-            function setTheme(theme) {
-                document.body.className = theme;
-                localStorage.setItem("theme", theme);
+            if (savedTheme) {
+                document.body.className = savedTheme;
             }
+        }
 
-            window.onload = function () {
-                const savedFont = localStorage.getItem("fontSize");
-                const savedTheme = localStorage.getItem("theme");
-
-                if (savedFont) {
-                    fontSize = parseInt(savedFont);
-                    document.getElementById("content").style.fontSize = fontSize + "px";
-                }
-                if (savedTheme) {
-                    document.body.className = savedTheme;
-                }
-            }
-
-            function changeFont() {
-                currentFontIndex = (currentFontIndex + 1) % fontStyles.length;
-                const newFont = fontStyles[currentFontIndex];
-                document.getElementById("content").style.fontFamily = newFont;
-                saveSetting("fontFamily", newFont);
-            }
-        </script>
+        function changeFont(fontFamily) {
+            document.getElementById("content").style.fontFamily = fontFamily;
+        }
+    </script>
 </body>
 
 </html>
