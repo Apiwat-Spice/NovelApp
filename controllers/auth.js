@@ -155,11 +155,11 @@ exports.addNovel = (req, res) => {
 exports.addChapter = (req, res) => {
     console.log(req.body);
     const id = req.params.id;
-    const { title, content, chaptersNum } = req.body;
-    const sql = "INSERT INTO chapters (idNovel1, title, content, chaptersNum) VALUES (?, ?, ?, ?)";
+    const { title, content, chapter_number } = req.body;
+    const sql = "INSERT INTO chapters (novel_id,  content, chapter_number) VALUES (?, ?,  ?)";
 
-    db.query(sql, [id, title, content, chaptersNum || null], (err, result) => {
-        if (err) return res.send("Failed to add chapter");
+    db.query(sql, [id, title, content, chapter_number || null], (err, result) => {
+        if (err) return res.send(err);
         res.redirect(`/read/${id}`);
     });
 }

@@ -45,7 +45,7 @@ router.get('/read/:id', isLoggedIn, (req, res) => {
 
     const novel = novelResults[0];
 
-    db.query("SELECT * FROM chapters WHERE idNovel1 = ? ORDER BY chaptersNum ASC", [id], (err, chapterResults) => {
+    db.query("SELECT * FROM chapters WHERE id = ? ORDER BY chaptersNum ASC", [id], (err, chapterResults) => {
       if (err) {
         console.error(err);
         chapterResults = []; 
@@ -59,17 +59,30 @@ router.get('/logout',authController.logout);
 router.get('/chapter/:id', isLoggedIn, (req, res) => {
   const chapterId = req.params.id;
 
-  db.query("SELECT * FROM chapters WHERE idchapters = ?", [chapterId], (err, results) => {
+  // Get current chapter
+  db.query("SELECT * FROM chapters WHERE id = ?", [chapterId], (err, results) => {
     if (err || results.length === 0) return res.send("Chapter not found");
 
     const chapter = results[0];
 
     // Get novel name for breadcrumb
-    db.query("SELECT name FROM novell WHERE idNovel1 = ?", [chapter.idNovel1], (err2, novelRes) => {
+    db.query("SELECT name FROM novels WHERE id = ?", [chapter.id], (err2, novelRes) => {
       const novelName = novelRes[0]?.name || 'Unknown';
-      res.render('readChapter', { chapter, novelName, user: req.user });
+
+      // Now get previous and next chapters
+      const sqlPrev = "SELECT id FROM chapters WHERE id = ? AND chapter_number < ? ORDER BY chapter_number DESC LIMIT 1";
+      const sqlNext = "SELECT id FROM chapters WHERE id = ? AND chapter_number > ? ORDER BY chapter_number ASC LIMIT 1";
+
+      db.query(sqlPrev, [chapter.id, chapter.chapter_number], (err3, prevRes) => {
+        db.query(sqlNext, [chapter.id, chapter.chapter_number], (err4, nextRes) => {
+          const prevChapter = prevRes.length > 0 ? prevRes[0].idchapters : null;
+          const nextChapter = nextRes.length > 0 ? nextRes[0].idchapters : null;
+
+          res.render('readChapter', { chapter, novelName, prevChapter, nextChapter });
+        });
+      });
     });
-  });
+});
 });
 
 router.post("/addNovel", isLoggedIn,authController.addNovel);
