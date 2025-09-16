@@ -27,6 +27,10 @@ router.get('/register', isLoggedIn, (req, res) => {
   res.render('register', { message: '', user: req.user })
 })
 
+router.get('/coin',isLoggedIn,(req,res)=>{
+  res.render('coin');
+})
+
 router.get('/login', isLoggedIn, (req, res) => {
   res.render('login', { message: '', user: req.user })
 })
@@ -128,26 +132,10 @@ router.get('/chapter/:id', isLoggedIn, (req, res) => {
   });
 });
 
-// router.post('/chapter/:id/comment', isLoggedIn, (req, res) => {
-//   const chapterId = req.params.id;
-//   const userId = req.user.user_id;
-//   const { content } = req.body;
-
-//   if (!content) return res.status(400).send("Content is required");
-
-//   const sql = "INSERT INTO comments (chapter_id, user_id, content) VALUES (?, ?, ?)";
-//   db.query(sql, [chapterId, userId, content], (err, result) => {
-//     if (err) {
-//       console.error(err);
-//       return res.send("Failed to post comment");
-//     }
-//     res.redirect(`/chapter/${chapterId}`);
-//   });
-// });
-
 // Post routes
 router.post("/addNovel", isLoggedIn, authController.addNovel);
 router.post('/novel/:id/addChapter', isLoggedIn, authController.addChapter);
 router.post("/chapter/:id/comment",isLoggedIn, authController.addComment);
+router.post("/coin",isLoggedIn, authController.coin);
 
 module.exports = router;
