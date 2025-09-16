@@ -162,6 +162,19 @@ exports.addChapter = (req, res) => {
         res.redirect(`/read/${id}`);
     });
 };
+exports.addComment = (req, res) => {
+    const chapterId = req.params.id;
+    const userId = req.user.user_id;
+    const { content } = req.body;
+
+    if (!content) return res.status(400).send("Content is required");
+
+    const sql = "INSERT INTO comments (chapter_id, user_id, content) VALUES (?, ?, ?)";
+    db.query(sql, [chapterId, userId, content], (err, result) => {
+        if (err) return res.send("Failed to post comment");
+        res.redirect(`/chapter/${chapterId}`);
+    });
+};
 
 exports.logout = (req, res) => {
     res.clearCookie('jwt'); // เคลียร์ JWT cookie
