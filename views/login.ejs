@@ -91,7 +91,8 @@
           <span class="input-group-text" id="basic-addon2"><i class="fa-solid fa-lock"></i></span>
           <input type="password" class="form-control" aria-describedby="basic-addon2" placeholder="**********" aria-label="***************" id="password" name="password" required>
         </div>
-        <a href="/register" class="register_link">Don’t have account <b>register here</b> </a>
+        <p class="register_link">Don’t have account<a href="/register" > <b>register here</b></a></p>
+        
         <button type="submit" class="btn-lg btn-light">Login</button>
         <% if (message) { %>
         <h4 class="alert alert-danger mt-4"><%= message %></h4>

@@ -153,14 +153,15 @@ exports.addChapter = (req, res) => {
     console.log(req.body);
 
     const id = req.params.id;
-    const { content, chapter_number } = req.body;
+    const chapter_number = req.body.chapter_number
+    const content = req.body.content;
     let cost = 0;
     if (chapter_number >= 4) cost = 3;
 
     const sql = `INSERT INTO chapters (novel_id, chapter_number, content, cost)
              VALUES (?, ?, ?, ?)`;
 
-    db.query(sql, [id, content, chapter_number, cost|| null], (err, result) => {
+    db.query(sql, [id, chapter_number, content, cost|| null], (err, result) => {
         if (err) return res.send(err);
         res.redirect(`/read/${id}`);
     });
