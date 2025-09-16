@@ -165,9 +165,6 @@ router.get('/chapter/:id', isLoggedIn, (req, res) => {
     });
 });
 
-
-
-
 // Post routes
 router.post("/addNovel", isLoggedIn, authController.addNovel);
 router.post('/novel/:id/addChapter', isLoggedIn, authController.addChapter);
