@@ -1,27 +1,31 @@
 const jwt = require('jsonwebtoken');
 
-// D:\ApiwatSpice\RealS\Project101\NovelApp\controllers\authMiddleware.js
 exports.isLoggedIn = (req, res, next) => {
-    const token = req.cookies.jwt;
+  const token = req.cookies.jwt;
+  if (!token) {
+    res.locals.loggedIn = false;
+    req.user = null;
+    return next();
+  }
 
-    if (!token) {
-        res.locals.loggedIn = false; // ส่งค่าไปทุก view
-        return next();
-    }
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = {
+      user_id: decoded.user_id,
+      username: decoded.username,
+      email: decoded.email,
+      coins: decoded.coins,
+      is_premium: decoded.is_premium,
+      premium_expire: decoded.premium_expire
+    };
 
-        req.user = {
-            user_id: decoded.user_id,
-            email: decoded.email
-        };
-
-        res.locals.loggedIn = true;
-        next();
-    } catch (err) {
-        console.log("JWT verify error:", err.message);
-        res.locals.loggedIn = false;
-        return next();
-    }
+    res.locals.loggedIn = true;
+    next();
+  } catch (err) {
+    console.log("JWT verify error:", err.message);
+    res.locals.loggedIn = false;
+    req.user = null;
+    return next();
+  }
 };

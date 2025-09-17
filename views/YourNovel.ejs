@@ -29,6 +29,7 @@
     a:hover {
       color: inherit;
     }
+
     .bd-placeholder-img {
       font-size: 1.125rem;
       text-anchor: middle;
@@ -36,8 +37,9 @@
       -moz-user-select: none;
       user-select: none;
     }
+
     body {
-      background-color: rgb(255, 255, 255); 
+      background-color: rgb(255, 255, 255);
       height: 100vh;
     }
 
@@ -50,95 +52,97 @@
     .container {
       max-width: 960px;
     }
-        a {
+
+    a {
       text-decoration: none;
       color: inherit;
       cursor: pointer;
     }
 
     a:hover {
-      color:inherit;
+      color: inherit;
     }
   </style>
 </head>
 
 <body class="bg-light">
-<header>
-        <div class="px-3 py-2 bg-dark text-white">
-          <div class="container">
-            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-              <a href="/index" class="d-flex align-items-center my-2 my-lg-0 me-lg-auto text-white text-decoration-none">
-                <i class="fa-solid fa-book-quran fa-4x"></i>
-                <h3>Novel Website</h3>
+  <header>
+    <div class="px-3 py-2 bg-dark text-white">
+      <div class="container">
+        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+          <a href="/index" class="d-flex align-items-center my-2 my-lg-0 me-lg-auto text-white text-decoration-none">
+            <i class="fa-solid fa-book-quran fa-4x"></i>
+            <h3>Novel Website</h3>
+          </a>
+
+          <ul class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
+            <li>
+              <a href="/index" class="nav-link text-white">
+                <i class="fa-solid fa-house bi d-block mx-auto mb-1 fa-2x"></i>
+                Home
               </a>
+            </li>
+            <li>
+              <a href="/addNovel" class="nav-link text-secondary">
+                <i class="fa-solid fa-pen-nib bi d-block mx-auto mb-1 fa-2x"></i>
+                CreateNovel
+              </a>
+            </li>
+            <li>
+              <a href="/coin" class="nav-link text-white">
+                <i class="fa-solid fa-coins bi d-block mx-auto mb-1 fa-2x"></i>
+                Coins
+              </a>
+            </li>
+            <li><a href="/chatbot" class="nav-link text-white"><i class="fa-solid fa-comments-dollar d-block mx-auto mb-1 fa-2x"></i>Chatbot</a></li>
+            <li>
+              <a href="/profile" class="nav-link text-white">
+                <i class="fa-solid fa-user bi d-block mx-auto mb-1 fa-2x"></i>
+                Profile
+              </a>
+            </li>
+          </ul>
 
-              <ul class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
-                <li>
-                  <a href="/index" class="nav-link text-white">
-                    <i class="fa-solid fa-house bi d-block mx-auto mb-1 fa-2x"></i>
-                    Home
-                  </a>
-                </li>
-                <li>
-                  <a href="/addNovel" class="nav-link text-secondary">
-                    <i class="fa-solid fa-pen-nib bi d-block mx-auto mb-1 fa-2x"></i>
-                    CreateNovel
-                  </a>
-                </li>
-                <li>
-                  <a href="/coin" class="nav-link text-white">
-                    <i class="fa-solid fa-coins bi d-block mx-auto mb-1 fa-2x"></i>
-                    Coins
-                  </a>
-                </li>
-                <li>
-                  <a href="/profile" class="nav-link text-white">
-                    <i class="fa-solid fa-user bi d-block mx-auto mb-1 fa-2x"></i>
-                    Profile
-                  </a>
-                </li>
-              </ul>
-
-            </div>
-          </div>
         </div>
-        <div class="px-3 py-2 border-bottom mb-3">
-          <div class="container d-flex flex-wrap justify-content-between">
-            <div class="leftside row gx-5">
-              <div class="col-12 col-lg-auto mb-2 mb-lg-0 me-lg-auto text-black "><a href="/addNovel">เพิ่มนิยาย</a></div>
-              <div class="col-12 col-lg-auto mb-2 mb-lg-0 me-lg-auto text-black fw-bold"><a href="/YourNovel">แก้ไขนิยาย</a></div>
-              <div class="col-12 col-lg-auto mb-2 mb-lg-0 me-lg-auto text-black"><a href="/Reviews">ดูรีวิว</a></div>
-            </div>
+      </div>
+    </div>
+    <div class="px-3 py-2 border-bottom mb-3">
+      <div class="container d-flex flex-wrap justify-content-between">
+        <div class="leftside row gx-5">
+          <div class="col-12 col-lg-auto mb-2 mb-lg-0 me-lg-auto text-black "><a href="/addNovel">เพิ่มนิยาย</a></div>
+          <div class="col-12 col-lg-auto mb-2 mb-lg-0 me-lg-auto text-black fw-bold"><a href="/YourNovel">แก้ไขนิยาย</a></div>
+          <div class="col-12 col-lg-auto mb-2 mb-lg-0 me-lg-auto text-black"><a href="/Reviews">ดูรีวิว</a></div>
+        </div>
         <div class="text-end">
           <% if (loggedIn) { %>
-            <a href="/logout" class="btn btn-danger">
-              <i class="fa-solid fa-right-from-bracket"></i> Logout
-            </a>
+          <a href="/logout" class="btn btn-danger">
+            <i class="fa-solid fa-right-from-bracket"></i> Logout
+          </a>
           <% } else { %>
-            <a href="/login" class="btn btn-light text-dark me-2">Login</a>
-            <a href="/register" class="btn btn-primary">Sign-up</a>
+          <a href="/login" class="btn btn-light text-dark me-2">Login</a>
+          <a href="/register" class="btn btn-primary">Sign-up</a>
           <% } %>
         </div>
-          </div>
-        </div>
-      </header>
+      </div>
+    </div>
+  </header>
   <main class="container mt-4">
     <div class="row">
       <% if (data && data.length > 0) { %>
-        <% data.forEach(novel => { %>
-          <div class="col-md-4 mb-3">
-            <div class="card h-100">
-              <img src="<%= novel.cover_url %>" class="card-img-top" alt="<%= novel.title %>">
-              <div class="card-body d-flex flex-column">
-                <h5 class="card-title"><%= novel.title %></h5>
-                <p class="card-text"><small class="text-muted">By <%= novel.author_name %></small></p>
-                <a href="/novel/<%= novel.novel_id %>/addChapter" class="btn btn-primary mt-auto">เพิ่มตอน</a>
-              </div>
-            </div>
+      <% data.forEach(novel => { %>
+      <div class="col-md-4 mb-3">
+        <div class="card h-100">
+          <img src="<%= novel.cover_url %>" class="card-img-top" alt="<%= novel.title %>">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title"><%= novel.title %></h5>
+            <p class="card-text"><small class="text-muted">By <%= novel.author_name %></small></p>
+            <a href="/novel/<%= novel.novel_id %>/addChapter" class="btn btn-primary mt-auto">เพิ่มตอน</a>
           </div>
-        <% }) %>
+        </div>
+      </div>
+      <% }) %>
       <% } else { %>
-        <p>No novels found.</p>
+      <p>No novels found.</p>
       <% } %>
     </div>
   </main>

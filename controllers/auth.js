@@ -49,7 +49,6 @@ exports.register = (req, res) => {
         });
     });
 };
-
 exports.login = (req, res) => {
     const { email, password } = req.body;
 
@@ -74,7 +73,11 @@ exports.login = (req, res) => {
         } else {
             // สร้าง JWT token
             const token = jwt.sign(
-                { user_id: user.user_id, email: user.email },
+                {
+                    user_id: user.user_id,
+                    email: user.email,
+                    is_premium: user.is_premium,
+                },
                 process.env.JWT_SECRET,
                 { expiresIn: '1d' }
             );
@@ -97,7 +100,6 @@ exports.login = (req, res) => {
         }
     });
 };
-
 exports.addNovel = (req, res) => {
     console.log(req.body);
 
@@ -148,7 +150,6 @@ exports.addNovel = (req, res) => {
         });
     });
 };
-
 exports.addChapter = (req, res) => {
     console.log(req.body);
 
@@ -189,7 +190,6 @@ exports.addChapter = (req, res) => {
         });
     });
 };
-
 exports.addComment = (req, res) => {
     const chapterId = req.params.id;
     const userId = req.user.user_id;
@@ -203,34 +203,31 @@ exports.addComment = (req, res) => {
         res.redirect(`/chapter/${chapterId}`);
     });
 };
-
 exports.logout = (req, res) => {
     res.clearCookie('jwt'); // เคลียร์ JWT cookie
     res.redirect('/login');
 };
-exports.coin = (req,res) =>{
+exports.coin = (req, res) => {
     const amount_coin = req.body.amount;
     const amount_bath = req.body.amount;
     const userId = req.user.user_id;
     const earn = "earn"
     const bath_to_coin = "bath_to_coin"
-    
+
     //API Payments
-    
+
     const sql = "INSERT INTO coin_payments (user_id, type, method, amount_coin, amount_bath) VALUES (?, ?, ?, ?, ?)";
-    db.query(sql,[userId,earn,bath_to_coin,amount_coin,amount_bath],(err,result)=>{
+    db.query(sql, [userId, earn, bath_to_coin, amount_coin, amount_bath], (err, result) => {
         if (err) return res.send("Failed to โอนตังค์");
         const sqlUpdate = "UPDATE users SET coins = coins + ? WHERE user_id = ?";
         db.query(sqlUpdate, [amount_coin, userId], (err2, result2) => {
             if (err2) return res.status(500).send("Failed to update coins");
-        res.redirect("/coin"); 
+            res.redirect("/coin");
         });
     })
 };
-
 exports.unlock = (req, res) => {
-    console.log("i do unlock");
-    
+
     const chapterId = req.params.id;
     const user = req.user;
 
@@ -273,5 +270,61 @@ exports.likeChapter = (req, res) => {
         if (err) return res.status(500).send("Failed to like chapter");
 
         res.redirect(`/chapter/${chapterId}`); // reload chapter page
+    });
+};
+exports.premium = (req, res) => {
+    const user_id = req.user.user_id;
+    const premium_class = req.body.premium_class;
+
+    const premium_day = { noob: 1, pro: 30, hacker: 365 }[premium_class];
+    const price_coin = { noob: 1, pro: 25, hacker: 359 }[premium_class];
+
+    if (!premium_day) {
+        return res.status(400).send("Error 404 only (noob, pro, hacker)");
+    }
+
+    const sql = 'SELECT * FROM users WHERE user_id = ?';
+    db.query(sql, [user_id], (err, results) => {
+        if (err) return res.status(500).send(err);
+        if (results.length === 0) return res.status(404).send("User not found");
+        const user = results[0];
+
+        if (user.coins < price_coin) {
+            return res.status(400).render('404', {
+                alertMessage: "Not enough coins"
+            });
+        }
+
+        // คำนวณวันหมดอายุ
+        let expireDate;
+        if (user.is_premium && user.premium_expire) {
+            expireDate = new Date(user.premium_expire);
+        } else {
+            expireDate = new Date();
+        }
+        expireDate.setDate(expireDate.getDate() + premium_day);
+        const expireFormat = expireDate.toISOString().split('T')[0];
+
+        // เริ่ม transaction (optional แต่แนะนำ)
+        db.beginTransaction(err => {
+            if (err) return res.status(500).send(err);
+
+            // 1. ลบเหรียญผู้ใช้
+            const updateUserSql = 'UPDATE users SET coins = coins - ?, is_premium = 1, premium_expire = ?, updated_at = NOW() WHERE user_id = ?';
+            db.query(updateUserSql, [price_coin, expireFormat, user_id], (err2) => {
+                if (err2) return db.rollback(() => res.status(500).send(err2));
+
+                // 2. บันทึกการใช้เหรียญใน coin_payments
+                const insertCoinSql = 'INSERT INTO coin_payments (user_id, type, method, amount_coin, created_at) VALUES (?, "spend", "coin_to_premium", ? , NOW())';
+                db.query(insertCoinSql, [user_id, price_coin], (err3) => {
+                    if (err3) return db.rollback(() => res.status(500).send(err3));
+
+                    db.commit(err4 => {
+                        if (err4) return db.rollback(() => res.status(500).send(err4));
+                        res.redirect('/profile');
+                    });
+                });
+            });
+        });
     });
 };

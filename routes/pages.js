@@ -15,26 +15,21 @@ const db = mysql.createConnection({
 router.get('/', isLoggedIn, (req, res) => {
   res.render('login', { message: '', user: req.user })
 })
-
 router.get('/index', isLoggedIn, (req, res) => {
   db.query("SELECT * FROM novels ORDER BY title ASC", (err, results) => {
     if (err) return res.render('index', { data: [], user: req.user });
     res.render('index', { data: results, user: req.user });
   });
 });
-
 router.get('/register', isLoggedIn, (req, res) => {
   res.render('register', { message: '', user: req.user })
 })
-
 router.get('/coin',isLoggedIn,(req,res)=>{
   res.render('coin');
 })
-
 router.get('/login', isLoggedIn, (req, res) => {
   res.render('login', { message: '', user: req.user })
 })
-
 router.get('/addNovel', isLoggedIn, (req, res) => {
   res.render('addNovel', { message: '' })
 })
@@ -82,14 +77,13 @@ router.get('/profile', isLoggedIn, (req, res) => {
 
       const user = userResults[0] || {};
       res.render('profile', {
-        user,           // ส่งข้อมูล user ครบทุกฟิลด์
-        commentCount    // จำนวนคอมเมนต์
+        user,          
+        commentCount,    
+        alertMessage:""
       });
     });
   });
 });
-
-
 router.get('/Reviews', isLoggedIn, (req, res) => {
   const userId = req.user.user_id;
 
@@ -116,6 +110,9 @@ router.get('/Reviews', isLoggedIn, (req, res) => {
     res.render('Reviews', { data: results, user: req.user });
   });
 });
+router.get('/chatbot', isLoggedIn, (req, res) => {
+  res.render("chatbot")
+});
 router.get('/novel/:id/addChapter', isLoggedIn, (req, res) => {
   const id = req.params.id;
 
@@ -126,11 +123,11 @@ router.get('/novel/:id/addChapter', isLoggedIn, (req, res) => {
     res.render('addChapter', { novel: novel, user: req.user });
   });
 });
-
-// อ่าน novel + chapters
 router.get('/read/:id', isLoggedIn, (req, res) => {
   const novelId = req.params.id;
   const user = req.user;
+  console.log(user);
+  
 
   db.query("SELECT * FROM novels WHERE novel_id = ?", [novelId], (err, novelResults) => {
     if (err || novelResults.length === 0) return res.send("Novel not found");
@@ -175,10 +172,7 @@ router.get('/read/:id', isLoggedIn, (req, res) => {
     });
   });
 });
-
-// logout
 router.get('/logout', authController.logout);
-
 router.get('/chapter/:id', isLoggedIn, (req, res) => {
   const chapterId = req.params.id;
   const user = req.user;
@@ -252,7 +246,6 @@ router.get('/chapter/:id', isLoggedIn, (req, res) => {
     });
   });
 });
-
 // Post routes
 router.post("/addNovel", isLoggedIn, authController.addNovel);
 router.post('/novel/:id/addChapter', isLoggedIn, authController.addChapter);
@@ -260,5 +253,6 @@ router.post("/chapter/:id/comment",isLoggedIn, authController.addComment);
 router.post("/chapter/:id/unlock",isLoggedIn, authController.unlock)
 router.post("/coin",isLoggedIn, authController.coin);
 router.post("/chapter/:id/like", isLoggedIn, authController.likeChapter);
+router.post("/premium", isLoggedIn, authController.premium);
 
 module.exports = router;

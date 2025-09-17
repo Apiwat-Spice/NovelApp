@@ -42,6 +42,7 @@
             <li><a href="/index" class="nav-link text-secondary"><i class="fa-solid fa-house d-block mx-auto mb-1 fa-2x"></i>Home</a></li>
             <li><a href="/addNovel" class="nav-link text-white"><i class="fa-solid fa-pen-nib d-block mx-auto mb-1 fa-2x"></i>Create Novel</a></li>
             <li><a href="/coin" class="nav-link text-white"><i class="fa-solid fa-coins d-block mx-auto mb-1 fa-2x"></i>Coins</a></li>
+            <li><a href="/chatbot" class="nav-link text-white"><i class="fa-solid fa-comments-dollar d-block mx-auto mb-1 fa-2x"></i>Chatbot</a></li>
             <li><a href="/profile" class="nav-link text-white"><i class="fa-solid fa-user d-block mx-auto mb-1 fa-2x"></i>Profile</a></li>
           </ul>
         </div>
@@ -51,15 +52,23 @@
     <div class="px-3 py-2 border-bottom mb-3">
       <div class="container d-flex flex-wrap justify-content-between align-items-center">
 
-        <form class="d-flex col-12 col-lg-auto mb-2 mb-lg-0">
+        <form class="d-flex col-12 col-lg-auto mb-2 mb-lg-0" method="POST" action="/category">
           <div class="dropdown me-2">
-            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" name="list">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" name="category">
               <i class="fa-solid fa-list"></i>
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-              <li><a class="dropdown-item" href="#">Action 1</a></li>
-              <li><a class="dropdown-item" href="#">Action 2</a></li>
-              <li><a class="dropdown-item" href="#">Action 3</a></li>
+              <li><a class="dropdown-item" href="#">Romance</a></li>
+              <li><a class="dropdown-item" href="#">Action/Adventure</a></li>
+              <li><a class="dropdown-item" href="#">Fantasy</a></li>
+              <li><a class="dropdown-item" href="#">Sci-Fi</a></li>
+              <li><a class="dropdown-item" href="#">Horror / Thriller</a></li>
+              <li><a class="dropdown-item" href="#">Fantasy</a></li>
+              <li><a class="dropdown-item" href="#">Drama</a></li>
+              <li><a class="dropdown-item" href="#">Comedy</a></li>
+              <li><a class="dropdown-item" href="#">Mystery / Detective</a></li>
+              <li><a class="dropdown-item" href="#">Historical / Period</a></li>
+              <li><a class="dropdown-item" href="#">LGBTQ+ / Yaoi / Yuri</a></li>
             </ul>
           </div>
 
