@@ -96,28 +96,30 @@
         <h3>กดอ่าน</h3>
       </div>
 
-      <% if (chapters && chapters.length> 0) { %>
-      <ul class="list-group">
-        <% chapters.forEach(chap => { %>
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-          <strong><%= chap.chapter_number %></strong>
-          <strong><%= chap.chapter_name ? chap.chapter_name : "ไม่มีชื่อตอน" %></strong>
-          
-          <%= user.is_premium %>
-          <%= chap.locked %>
-          <% if (chap.locked || user.premium === 0) { %>
+<% if (chapters && chapters.length > 0) { %>
+  <ul class="list-group">
+    <% chapters.forEach(chap => { %>
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <strong><%= chap.chapter_number %></strong>
+        <strong><%= chap.chapter_name ? chap.chapter_name : "ไม่มีชื่อตอน" %></strong>
+        
+        <% if (chap.locked && (!user || user.is_premium == 0)) { %>
+          <!-- ตอนถูกล็อกและ user ไม่มี premium หรือยังไม่ได้ล็อกอิน -->
           <form method="POST" action="/chapter/<%= chap.chapter_id %>/unlock" class="m-0">
             <button type="submit" class="btn btn-warning btn-sm">Unlock (<%= chap.cost %> coins)</button>
           </form>
-          <% } else { %>
+        <% } else { %>
+          <!-- ถ้าตอนไม่ล็อก อ่านได้เลย -->
           <a href="/chapter/<%= chap.chapter_id %>" class="btn btn-primary btn-sm">Read</a>
-          <% } %>
-        </li>
-        <% }) %>
-      </ul>
-      <% } else { %>
-      <p class="text-muted">No chapters yet.</p>
-      <% } %>
+        <% } %>
+      </li>
+    <% }) %>
+  </ul>
+<% } else { %>
+  <p class="text-muted">No chapters yet.</p>
+<% } %>
+
+
     </div>
 
   </div>

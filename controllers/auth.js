@@ -340,6 +340,28 @@ exports.premium = (req, res) => {
 
                     db.commit(err4 => {
                         if (err4) return db.rollback(() => res.status(500).send(err4));
+
+                        // สร้าง JWT ใหม่
+                        const newToken = jwt.sign(
+                            {
+                                user_id: user.user_id,
+                                username: user.username,
+                                email: user.email,
+                                coins: user.coins - price_coin,   // ลดเหรียญแล้ว
+                                is_premium: 1,                     // ตั้ง premium เป็น 1
+                                premium_expire: expireFormat       // วันหมดอายุใหม่
+                            },
+                            process.env.JWT_SECRET,
+                            { expiresIn: '1d' }
+                        );
+
+                        // อัปเดต cookie
+                        res.cookie('jwt', newToken, {
+                            httpOnly: true,
+                            secure: true,
+                            maxAge: 24 * 60 * 60 * 1000
+                        });
+
                         res.redirect('/profile');
                     });
                 });

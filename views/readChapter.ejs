@@ -182,18 +182,21 @@
 
     <!-- Chapter Content / Locked Logic -->
     <div id="content">
-      <% if (locked) { %>
-        <div class="text-center p-4 border rounded" style="background:#f8f9fa;">
-          <p>This chapter costs <strong>
-              <%= chapter.cost %>
-            </strong> coins to unlock.</p>
-          <form method="POST" action="/chapter/<%= chapter.chapter_id %>/unlock">
-            <button type="submit" class="btn btn-primary">Unlock Chapter</button>
-          </form>
-        </div>
-        <% } else { %>
-          <%= chapter.content %>
-            <% } %>
+      <% if (chapter.locked) { %>
+  <div class="text-center p-4 border rounded" style="background:#f8f9fa;">
+    <p>This chapter costs <strong><%= chapter.cost %></strong> coins to unlock.</p>
+    <% if (!user || user.is_premium === 0) { %>
+      <!-- เฉพาะผู้ใช้ที่ไม่มี premium หรือไม่ได้ล็อกอินเท่านั้นถึงเห็นปุ่ม Unlock -->
+      <form method="POST" action="/chapter/<%= chapter.chapter_id %>/unlock">
+        <button type="submit" class="btn btn-primary">Unlock Chapter</button>
+      </form>
+    <% } %>
+  </div>
+<% } else { %>
+  <!-- แสดงเนื้อหาเลย -->
+  <%= chapter.content %>
+<% } %>
+
 
     </div>
 

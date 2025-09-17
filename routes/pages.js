@@ -150,7 +150,6 @@ router.get('/read/:id', isLoggedIn, (req, res) => {
   const novelId = req.params.id;
   const user = req.user;
   console.log(user);
-  
 
   db.query("SELECT * FROM novels WHERE novel_id = ?", [novelId], (err, novelResults) => {
     if (err || novelResults.length === 0) return res.send("Novel not found");
@@ -164,15 +163,23 @@ router.get('/read/:id', isLoggedIn, (req, res) => {
       }
 
       if (!user) {
-        // ถ้าไม่ได้ล็อกอิน → ทุกตอนที่ cost > 0 ให้ locked = true
+        // ไม่ล็อกอิน → cost > 0 = locked
         const chaptersWithLock = chapterResults.map(ch => ({
           ...ch,
           locked: ch.cost > 0
         }));
         return res.render('readNovel', { novel, chapters: chaptersWithLock, user: null });
+      } 
+      else if (user.is_premium === 1) {
+        // มี premium → อ่านได้ทุกตอน
+        const chaptersWithLock = chapterResults.map(ch => ({
+          ...ch,
+          locked: false
+        }));
+        return res.render('readNovel', { novel, chapters: chaptersWithLock, user });
       }
 
-      // ถ้า login → เช็คว่าผู้ใช้ unlock ตอนอะไรแล้ว
+      // ล็อกอินแล้ว ไม่มี premium → เช็ค progress
       db.query(
         "SELECT chapter_number FROM user_progress WHERE user_id=? AND novel_id=? AND unlocked=1",
         [user.user_id, novelId],
@@ -195,6 +202,7 @@ router.get('/read/:id', isLoggedIn, (req, res) => {
     });
   });
 });
+
 router.get('/logout', authController.logout);
 router.get('/chapter/:id', isLoggedIn, (req, res) => {
   const chapterId = req.params.id;
