@@ -112,7 +112,6 @@ exports.addNovel = (req, res) => {
         category,
         PicUrl,
         Descriptions,
-        Novel_Content,
         Check18Content
     } = req.body;
 
@@ -125,14 +124,13 @@ exports.addNovel = (req, res) => {
         category,
         PicUrl,
         Descriptions,
-        Novel_Content,
         isAdult
     ];
 
     const sql = `
         INSERT INTO novels 
-        (title, user_id, author_name, category, cover_url, description, content, is_adult)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        (title, user_id, author_name, category, cover_url, description, is_adult)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
 
     db.query(sql, values, (err, result) => {
@@ -229,32 +227,47 @@ exports.coin = (req, res) => {
 exports.unlock = (req, res) => {
 
     const chapterId = req.params.id;
-    const user = req.user;
+  const userId = req.user.user_id;
 
-    db.query("SELECT * FROM chapters WHERE chapter_id=?", [chapterId], (err, results) => {
-        if (err || results.length === 0) return res.send("Chapter not found");
-        const chapter = results[0];
+  // ดึง chapter
+  db.query('SELECT * FROM chapters WHERE chapter_id = ?', [chapterId], (err, results) => {
+    if (err) return res.send('Database error');
+    if (results.length === 0) return res.send('Chapter not found');
 
-        db.query("SELECT coins FROM users WHERE user_id=?", [user.user_id], (err2, userRes) => {
-            const userCoins = userRes[0].coins;
-            if (userCoins < chapter.cost) {
-                return res.send("Not enough coins");
+    const chap = results[0];
+
+    // Premium user อ่านฟรี
+    if (req.user.is_premium) {
+      return res.redirect(`/chapter/${chapterId}`);
+    }
+
+    // ตรวจสอบ coins
+    if (req.user.coins < chap.cost) {
+      return res.send('Not enough coins');
+    }
+
+    // หัก coins ของ user
+    db.query('UPDATE users SET coins = coins - ? WHERE user_id = ?', [chap.cost, userId], (err1) => {
+      if (err1) return res.send('Error deducting coins');
+
+      // เพิ่ม coins ให้ผู้สร้าง novel
+      db.query('UPDATE users u JOIN novels n ON u.user_id = n.user_id SET u.coins = u.coins + ? WHERE n.novel_id = ?', [chap.cost, chap.novel_id], (err2) => {
+        if (err2) return res.send('Error adding coins to author');
+
+        // อัพสถานะ unlocked
+        db.query('INSERT INTO user_progress (user_id, novel_id, chapter_number, unlocked) VALUES (?, ?, ?, 1) ON DUPLICATE KEY UPDATE unlocked=1', 
+          [userId, chap.novel_id, chap.chapter_number], 
+          (err3) => {
+            if (err3) {
+              console.log(err3); // ดู error จริง
+              return res.send('Error updating progress');
             }
-
-            // Minus coin
-            db.query("UPDATE users SET coins = coins - ? WHERE user_id=?", [chapter.cost, user.user_id]);
-
-            // transaction
-            db.query("INSERT INTO coin_payments (user_id, type, method, amount_coin) VALUES (?, 'spend', 'coin_to_chapter', ?)",
-                [user.user_id, chapter.cost]);
-
-            // Mark unlocked
-            db.query("INSERT INTO user_progress (user_id, novel_id, chapter_number, unlocked) VALUES (?, ?, ?, 1) ON DUPLICATE KEY UPDATE unlocked=1",
-                [user.user_id, chapter.novel_id, chapter.chapter_number]);
-
             res.redirect(`/chapter/${chapterId}`);
-        });
+          }
+        );
+      });
     });
+  });
 };
 exports.likeChapter = (req, res) => {
     const chapterId = req.params.id;
