@@ -62,14 +62,16 @@
           <div class="dropdown me-2">
             <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
               data-bs-toggle="dropdown" aria-expanded="false" name="list">
-              <i class="fa-solid fa-list"></i>
+              <i class="fa-solid fa-list"></i> Sort
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-              <li><a class="dropdown-item" href="#">Action 1</a></li>
-              <li><a class="dropdown-item" href="#">Action 2</a></li>
-              <li><a class="dropdown-item" href="#">Action 3</a></li>
+              <li><a class="dropdown-item" href="/index?sort=title_asc">เรียงตามชื่อ A → Z</a></li>
+              <li><a class="dropdown-item" href="/index?sort=date_desc">เรียงล่าสุด</a></li>
+              <li><a class="dropdown-item" href="/index?sort=likes_desc">ยอด Like มาก → น้อย</a></li>
             </ul>
           </div>
+
+
 
           <button class="btn btn-outline-primary" type="submit">
             <i class="fa-solid fa-magnifying-glass"></i>
@@ -119,9 +121,9 @@
               <p>No novels found.</p>
               <% } %>
     </div>
-
+ 
   </main>
-  
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
     crossorigin="anonymous"></script>
