@@ -1,6 +1,6 @@
 //npm init -y
-//npm i express mysql2 dotenv nodemon bcrypt ejs 
-const express = require('express')//cookie-parser jsonwebtoken
+//npm i express mysql2 dotenv nodemon bcrypt ejs cookie-parser jsonwebtoken
+const express = require('express')
 const mysql = require('mysql2')
 const dotenv = require('dotenv')
 const path = require('path')
@@ -10,7 +10,6 @@ const { isLoggedIn } = require('./controllers/authMiddleware');
 dotenv.config()
 const app = express()
 app.use(cookieParser());
-
 
 const db = mysql.createConnection({
     host: process.env.DATABASE_HOST,
