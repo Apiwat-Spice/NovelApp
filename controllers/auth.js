@@ -2,7 +2,6 @@ const mysql = require('mysql2')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken');
 
-// D:\ApiwatSpice\RealS\Project101\NovelApp\controllers\auth.js
 const db = mysql.createConnection({
     host: process.env.DATABASE_HOST,
     user: process.env.DATABASE_USER,
@@ -227,47 +226,47 @@ exports.coin = (req, res) => {
 exports.unlock = (req, res) => {
 
     const chapterId = req.params.id;
-  const userId = req.user.user_id;
+    const userId = req.user.user_id;
 
-  // ดึง chapter
-  db.query('SELECT * FROM chapters WHERE chapter_id = ?', [chapterId], (err, results) => {
-    if (err) return res.send('Database error');
-    if (results.length === 0) return res.send('Chapter not found');
+    // ดึง chapter
+    db.query('SELECT * FROM chapters WHERE chapter_id = ?', [chapterId], (err, results) => {
+        if (err) return res.send('Database error');
+        if (results.length === 0) return res.send('Chapter not found');
 
-    const chap = results[0];
+        const chap = results[0];
 
-    // Premium user อ่านฟรี
-    if (req.user.is_premium) {
-      return res.redirect(`/chapter/${chapterId}`);
-    }
+        // Premium user อ่านฟรี
+        if (req.user.is_premium) {
+            return res.redirect(`/chapter/${chapterId}`);
+        }
 
-    // ตรวจสอบ coins
-    if (req.user.coins < chap.cost) {
-      return res.send('Not enough coins');
-    }
+        // ตรวจสอบ coins
+        if (req.user.coins < chap.cost) {
+            return res.send('Not enough coins');
+        }
 
-    // หัก coins ของ user
-    db.query('UPDATE users SET coins = coins - ? WHERE user_id = ?', [chap.cost, userId], (err1) => {
-      if (err1) return res.send('Error deducting coins');
+        // หัก coins ของ user
+        db.query('UPDATE users SET coins = coins - ? WHERE user_id = ?', [chap.cost, userId], (err1) => {
+            if (err1) return res.send('Error deducting coins');
 
-      // เพิ่ม coins ให้ผู้สร้าง novel
-      db.query('UPDATE users u JOIN novels n ON u.user_id = n.user_id SET u.coins = u.coins + ? WHERE n.novel_id = ?', [chap.cost, chap.novel_id], (err2) => {
-        if (err2) return res.send('Error adding coins to author');
+            // เพิ่ม coins ให้ผู้สร้าง novel
+            db.query('UPDATE users u JOIN novels n ON u.user_id = n.user_id SET u.coins = u.coins + ? WHERE n.novel_id = ?', [chap.cost, chap.novel_id], (err2) => {
+                if (err2) return res.send('Error adding coins to author');
 
-        // อัพสถานะ unlocked
-        db.query('INSERT INTO user_progress (user_id, novel_id, chapter_number, unlocked) VALUES (?, ?, ?, 1) ON DUPLICATE KEY UPDATE unlocked=1', 
-          [userId, chap.novel_id, chap.chapter_number], 
-          (err3) => {
-            if (err3) {
-              console.log(err3); // ดู error จริง
-              return res.send('Error updating progress');
-            }
-            res.redirect(`/chapter/${chapterId}`);
-          }
-        );
-      });
+                // อัพสถานะ unlocked
+                db.query('INSERT INTO user_progress (user_id, novel_id, chapter_number, unlocked) VALUES (?, ?, ?, 1) ON DUPLICATE KEY UPDATE unlocked=1',
+                    [userId, chap.novel_id, chap.chapter_number],
+                    (err3) => {
+                        if (err3) {
+                            console.log(err3); // ดู error จริง
+                            return res.send('Error updating progress');
+                        }
+                        res.redirect(`/chapter/${chapterId}`);
+                    }
+                );
+            });
+        });
     });
-  });
 };
 exports.likeChapter = (req, res) => {
     const chapterId = req.params.id;
@@ -381,4 +380,62 @@ exports.premium = (req, res) => {
             });
         });
     });
+};
+exports.chatbot = (req, res) => {
+    const userId = req.user.user_id;
+    const { message } = req.body;
+
+    // list คำสั่งที่รองรับ
+    const commands = [
+        "เหรียญ / coin",
+        "premium / สมาชิก",
+        "รายการฝากถอน / transaction",
+        "เติมเงิน",
+        "ซื้อ chapter"
+    ];
+
+    if (/เหรียญ|coin/i.test(message)) {
+        const sql = "SELECT coins FROM users WHERE user_id = ?";
+        db.query(sql, [userId], (err, results) => {
+            if (err) return res.json({ reply: "ไม่สามารถดึงข้อมูลเหรียญได้" });
+            res.json({ reply: `คุณมี ${results[0].coins} coins` });
+        });
+
+    } else if (/premium|สมาชิก/i.test(message)) {
+        const sql = "SELECT is_premium, premium_expire FROM users WHERE user_id = ?";
+        db.query(sql, [userId], (err, results) => {
+            if (err) return res.json({ reply: "ไม่สามารถดึงข้อมูล Premium ได้" });
+            const user = results[0];
+            if (user.is_premium) {
+                res.json({ reply: `คุณเป็น Premium อยู่ จนถึงวันที่ ${user.premium_expire?.toISOString().slice(0, 10)}` });
+            } else {
+                res.json({ reply: "คุณยังไม่เป็น Premium" });
+            }
+        });
+
+    } else if (/รายการฝากถอน|transaction/i.test(message)) {
+        const sql = "SELECT type, method, amount_coin, amount_bath, created_at FROM coin_payments WHERE user_id = ? ORDER BY created_at DESC LIMIT 5";
+        db.query(sql, [userId], (err, results) => {
+            if (err) return res.json({ reply: "ไม่สามารถดึงข้อมูล transaction ได้" });
+            if (results.length === 0) return res.json({ reply: "ยังไม่มีรายการ transaction" });
+
+            let reply = "รายการ transaction ล่าสุด:\n";
+            results.forEach(r => {
+                reply += `${r.created_at.toISOString().slice(0, 19)} - ${r.type} - ${r.amount_coin} coins (${r.method})\n`;
+            });
+            res.json({ reply });
+        });
+
+    } else if (/เติมเงิน/i.test(message)) {
+        res.json({ reply: "คุณสามารถเติมเงินได้โดยโอนผ่านระบบ Bath-to-Coin" });
+
+    } else if (/ซื้อ chapter/i.test(message)) {
+        res.json({ reply: "คุณสามารถซื้อ chapter โดยใช้ coins ของคุณ" });
+
+    } else {
+        // else แสดง list คำสั่งทั้งหมด
+        let reply = "คำสั่งที่รองรับ:\n";
+        commands.forEach(cmd => { reply += `- ${cmd}\n`; });
+        res.json({ reply });
+    }
 };
