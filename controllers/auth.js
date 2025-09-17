@@ -260,17 +260,36 @@ exports.likeChapter = (req, res) => {
     const chapterId = req.params.id;
     const userId = req.user.user_id;
 
-    const sql = `
-        INSERT INTO chapter_likes (chapter_id, user_id)
-        VALUES (?, ?)
-        ON DUPLICATE KEY UPDATE created_at = NOW()
-    `;
+    // ตรวจสอบว่าผู้ใช้เคยกด Like แล้วหรือยัง
+    db.query(
+        "SELECT * FROM chapter_likes WHERE chapter_id=? AND user_id=?",
+        [chapterId, userId],
+        (err, results) => {
+            if (err) return res.status(500).send("Error checking like");
 
-    db.query(sql, [chapterId, userId], (err, result) => {
-        if (err) return res.status(500).send("Failed to like chapter");
-
-        res.redirect(`/chapter/${chapterId}`); // reload chapter page
-    });
+            if (results.length > 0) {
+                // ลบ Like
+                db.query(
+                    "DELETE FROM chapter_likes WHERE chapter_id=? AND user_id=?",
+                    [chapterId, userId],
+                    (err, delResult) => {
+                        if (err) return res.status(500).send("Failed to unlike chapter");
+                        res.redirect(`/chapter/${chapterId}`);
+                    }
+                );
+            } else {
+                // เพิ่ม Like
+                db.query(
+                    "INSERT INTO chapter_likes (chapter_id, user_id) VALUES (?, ?)",
+                    [chapterId, userId],
+                    (err, insertResult) => {
+                        if (err) return res.status(500).send("Failed to like chapter");
+                        res.redirect(`/chapter/${chapterId}`);
+                    }
+                );
+            }
+        }
+    );
 };
 exports.premium = (req, res) => {
     const user_id = req.user.user_id;
