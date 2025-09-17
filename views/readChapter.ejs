@@ -162,6 +162,20 @@
         <option value="Georgia">Georgia</option>
         <option value="Courier New">Courier New</option>
       </select>
+      <div class="mt-0 d-flex align-items-center gap-1">
+        <% if (user) { %>
+          <form method="POST" action="/chapter/<%= chapter.chapter_id %>/like" style="display:inline">
+            <button type="submit" class="btn btn-outline-primary">
+              <i class="fa-solid fa-thumbs-up"></i> Like
+            </button>
+          </form>
+          <% } else { %>
+            <span class="text-muted">Login to like this chapter</span>
+            <% } %>
+              <span>
+                <%= chapterLikes %> Likes
+              </span>
+      </div>
     </div>
 
     <!-- Chapter Title -->
@@ -182,6 +196,7 @@
         <% } else { %>
           <%= chapter.content %>
             <% } %>
+
     </div>
 
     <!-- Navigation -->
@@ -200,6 +215,7 @@
     </div>
 
     <hr>
+
 
     <!-- Comments -->
     <h3>Comments</h3>

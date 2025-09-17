@@ -17,8 +17,29 @@ router.get('/', isLoggedIn, (req, res) => {
 })
 
 router.get('/index', isLoggedIn, (req, res) => {
-  db.query("SELECT * FROM novels ORDER BY title ASC", (err, results) => {
-    if (err) return res.render('index', { data: [], user: req.user });
+  const sql = `
+    SELECT n.*, 
+           COALESCE(SUM(cl.likes), 0) AS total_likes
+    FROM novels n
+    LEFT JOIN (
+        SELECT chapter_id, COUNT(*) AS likes
+        FROM chapter_likes
+        GROUP BY chapter_id
+    ) cl ON cl.chapter_id IN (
+        SELECT chapter_id 
+        FROM chapters 
+        WHERE novel_id = n.novel_id
+    )
+    GROUP BY n.novel_id
+    ORDER BY n.title ASC
+  `;
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.render('index', { data: [], user: req.user });
+    }
+
     res.render('index', { data: results, user: req.user });
   });
 });
@@ -27,7 +48,7 @@ router.get('/register', isLoggedIn, (req, res) => {
   res.render('register', { message: '', user: req.user })
 })
 
-router.get('/coin',isLoggedIn,(req,res)=>{
+router.get('/coin', isLoggedIn, (req, res) => {
   res.render('coin');
 })
 
@@ -38,18 +59,18 @@ router.get('/login', isLoggedIn, (req, res) => {
 router.get('/addNovel', isLoggedIn, (req, res) => {
   res.render('addNovel', { message: '' })
 })
-router.get('/YourNovel',isLoggedIn,(req,res)=>{
-const userId = req.user.user_id;
-console.log(userId);
+router.get('/YourNovel', isLoggedIn, (req, res) => {
+  const userId = req.user.user_id;
+  console.log(userId);
 
-db.query(
-  "SELECT * FROM novels WHERE user_id = ? ORDER BY title ASC",
-  [userId],
-  (err, results) => {
-    if (err) return res.render('index', { data: [], user: req.user });
-    res.render('YourNovel', { data: results, user: req.user });
-  }
-);
+  db.query(
+    "SELECT * FROM novels WHERE user_id = ? ORDER BY title ASC",
+    [userId],
+    (err, results) => {
+      if (err) return res.render('index', { data: [], user: req.user });
+      res.render('YourNovel', { data: results, user: req.user });
+    }
+  );
 })
 router.get('/profile', isLoggedIn, (req, res) => {
   const userId = req.user.user_id;
@@ -73,7 +94,7 @@ router.get('/profile', isLoggedIn, (req, res) => {
 
     // Query ข้อมูล user ครบทุกฟิลด์
     const userSql = `SELECT * FROM users WHERE user_id = ?`;
-    
+
     db.query(userSql, [userId], (err2, userResults) => {
       if (err2) {
         console.error(err2);
@@ -201,27 +222,48 @@ router.get('/chapter/:id', isLoggedIn, (req, res) => {
                 ORDER BY created_at DESC
             `, [chapterId], (err3, comments) => {
 
+        // Get likes count
+        db.query(
+          "SELECT COUNT(*) AS likes FROM chapter_likes WHERE chapter_id=?",
+          [chapterId],
+          (err4, likeRes) => {
+            const chapterLikes = likeRes[0].likes || 0;
 
-
-        // Find prev/next chapters
-        db.query("SELECT chapter_id FROM chapters WHERE novel_id=? AND chapter_number<? ORDER BY chapter_number DESC LIMIT 1",
-          [chapter.novel_id, chapter.chapter_number],
-          (err4, prevRes) => {
-            const prevChapter = prevRes.length > 0 ? prevRes[0].chapter_id : null;
-
-            db.query("SELECT chapter_id FROM chapters WHERE novel_id=? AND chapter_number>? ORDER BY chapter_number ASC LIMIT 1",
+            // Find prev/next chapters
+            db.query(
+              "SELECT chapter_id FROM chapters WHERE novel_id=? AND chapter_number<? ORDER BY chapter_number DESC LIMIT 1",
               [chapter.novel_id, chapter.chapter_number],
-              (err5, nextRes) => {
-                const nextChapter = nextRes.length > 0 ? nextRes[0].chapter_id : null;
+              (err5, prevRes) => {
+                const prevChapter = prevRes.length > 0 ? prevRes[0].chapter_id : null;
 
-                // Check if chapter is locked
-                if (chapter.cost > 0) {
-                  db.query(
-                    "SELECT unlocked FROM user_progress WHERE user_id=? AND novel_id=? AND chapter_number=?",
-                    [user.user_id, chapter.novel_id, chapter.chapter_number],
-                    (err6, progRes) => {
-                      const locked = !(progRes.length > 0 && progRes[0].unlocked);
+                db.query(
+                  "SELECT chapter_id FROM chapters WHERE novel_id=? AND chapter_number>? ORDER BY chapter_number ASC LIMIT 1",
+                  [chapter.novel_id, chapter.chapter_number],
+                  (err6, nextRes) => {
+                    const nextChapter = nextRes.length > 0 ? nextRes[0].chapter_id : null;
 
+                    // Check if chapter is locked
+                    if (chapter.cost > 0 && user) {
+                      db.query(
+                        "SELECT unlocked FROM user_progress WHERE user_id=? AND novel_id=? AND chapter_number=?",
+                        [user.user_id, chapter.novel_id, chapter.chapter_number],
+                        (err7, progRes) => {
+                          const locked = !(progRes.length > 0 && progRes[0].unlocked);
+
+                          res.render("readChapter", {
+                            chapter,
+                            novelName,
+                            prevChapter,
+                            nextChapter,
+                            comments,
+                            user,
+                            locked,
+                            loggedIn: true,
+                            chapterLikes
+                          });
+                        }
+                      );
+                    } else {
                       res.render("readChapter", {
                         chapter,
                         novelName,
@@ -229,23 +271,13 @@ router.get('/chapter/:id', isLoggedIn, (req, res) => {
                         nextChapter,
                         comments,
                         user,
-                        locked,
-                        loggedIn: true
+                        locked: chapter.cost > 0,
+                        loggedIn: !!user,
+                        chapterLikes
                       });
                     }
-                  );
-                } else {
-                  res.render("readChapter", {
-                    chapter,
-                    novelName,
-                    prevChapter,
-                    nextChapter,
-                    comments,
-                    user,
-                    locked: false,
-                    loggedIn: true
+
                   });
-                }
               });
           });
       });
@@ -253,12 +285,13 @@ router.get('/chapter/:id', isLoggedIn, (req, res) => {
   });
 });
 
+
 // Post routes
 router.post("/addNovel", isLoggedIn, authController.addNovel);
 router.post('/novel/:id/addChapter', isLoggedIn, authController.addChapter);
-router.post("/chapter/:id/comment",isLoggedIn, authController.addComment);
-router.post("/chapter/:id/unlock",isLoggedIn, authController.unlock)
-router.post("/coin",isLoggedIn, authController.coin);
+router.post("/chapter/:id/comment", isLoggedIn, authController.addComment);
+router.post("/chapter/:id/unlock", isLoggedIn, authController.unlock)
+router.post("/coin", isLoggedIn, authController.coin);
 router.post("/chapter/:id/like", isLoggedIn, authController.likeChapter);
 
 module.exports = router;

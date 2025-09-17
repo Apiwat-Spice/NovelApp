@@ -208,29 +208,29 @@ exports.logout = (req, res) => {
     res.clearCookie('jwt'); // เคลียร์ JWT cookie
     res.redirect('/login');
 };
-exports.coin = (req,res) =>{
+exports.coin = (req, res) => {
     const amount_coin = req.body.amount;
     const amount_bath = req.body.amount;
     const userId = req.user.user_id;
     const earn = "earn"
     const bath_to_coin = "bath_to_coin"
-    
+
     //API Payments
-    
+
     const sql = "INSERT INTO coin_payments (user_id, type, method, amount_coin, amount_bath) VALUES (?, ?, ?, ?, ?)";
-    db.query(sql,[userId,earn,bath_to_coin,amount_coin,amount_bath],(err,result)=>{
+    db.query(sql, [userId, earn, bath_to_coin, amount_coin, amount_bath], (err, result) => {
         if (err) return res.send("Failed to โอนตังค์");
         const sqlUpdate = "UPDATE users SET coins = coins + ? WHERE user_id = ?";
         db.query(sqlUpdate, [amount_coin, userId], (err2, result2) => {
             if (err2) return res.status(500).send("Failed to update coins");
-        res.redirect("/coin"); 
+            res.redirect("/coin");
         });
     })
 };
 
 exports.unlock = (req, res) => {
     console.log("i do unlock");
-    
+
     const chapterId = req.params.id;
     const user = req.user;
 
@@ -263,15 +263,34 @@ exports.likeChapter = (req, res) => {
     const chapterId = req.params.id;
     const userId = req.user.user_id;
 
-    const sql = `
-        INSERT INTO chapter_likes (chapter_id, user_id)
-        VALUES (?, ?)
-        ON DUPLICATE KEY UPDATE created_at = NOW()
-    `;
+    // ตรวจสอบว่าผู้ใช้เคยกด Like แล้วหรือยัง
+    db.query(
+        "SELECT * FROM chapter_likes WHERE chapter_id=? AND user_id=?",
+        [chapterId, userId],
+        (err, results) => {
+            if (err) return res.status(500).send("Error checking like");
 
-    db.query(sql, [chapterId, userId], (err, result) => {
-        if (err) return res.status(500).send("Failed to like chapter");
-
-        res.redirect(`/chapter/${chapterId}`); // reload chapter page
-    });
+            if (results.length > 0) {
+                // ลบ Like
+                db.query(
+                    "DELETE FROM chapter_likes WHERE chapter_id=? AND user_id=?",
+                    [chapterId, userId],
+                    (err, delResult) => {
+                        if (err) return res.status(500).send("Failed to unlike chapter");
+                        res.redirect(`/chapter/${chapterId}`);
+                    }
+                );
+            } else {
+                // เพิ่ม Like
+                db.query(
+                    "INSERT INTO chapter_likes (chapter_id, user_id) VALUES (?, ?)",
+                    [chapterId, userId],
+                    (err, insertResult) => {
+                        if (err) return res.status(500).send("Failed to like chapter");
+                        res.redirect(`/chapter/${chapterId}`);
+                    }
+                );
+            }
+        }
+    );
 };
