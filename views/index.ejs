@@ -52,8 +52,9 @@
       <div class="container d-flex flex-wrap justify-content-between align-items-center">
 
         <form class="d-flex col-12 col-lg-auto mb-2 mb-lg-0">
+          <input type="search" class="form-control me-2" placeholder="Search..." aria-label="Search">
           <div class="dropdown me-2">
-            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" name="list">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
               <i class="fa-solid fa-list"></i>
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
@@ -85,30 +86,24 @@
   </header>
 
   <main class="container mt-4">
-<div class="row">
-  <% if (data && data.length > 0) { %>
-    <% data.forEach(novel => { %>
-      <div class="col-6 col-sm-4 col-md-3 mb-3">
+    <div class="row">
+      <% if (data && data.length > 0) { %>
+      <% data.forEach(novel => { %>
+      <div class="col-md-4 mb-3">
         <div class="card h-100">
-          <img src="<%= novel.cover_url %>" 
-               class="card-img-top" 
-               alt="<%= novel.title %>">
+          <img src="<%= novel.cover_url %>" class="card-img-top" alt="<%= novel.title %>">
           <div class="card-body d-flex flex-column">
             <h5 class="card-title"><%= novel.title %></h5>
-            <p class="card-text">
-              <small class="text-muted">By <%= novel.author_name %></small>
-            </p>
-            <a href="/read/<%= novel.novel_id %>" 
-               class="btn btn-primary mt-auto">Read</a>
+            <p class="card-text"><small class="text-muted">By <%= novel.author_name %></small></p>
+            <a href="/read/<%= novel.novel_id %>" class="btn btn-primary mt-auto">Read</a>
           </div>
         </div>
       </div>
-    <% }) %>
-  <% } else { %>
-    <p>No novels found.</p>
-  <% } %>
-</div>
-
+      <% }) %>
+      <% } else { %>
+      <p>No novels found.</p>
+      <% } %>
+    </div>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>

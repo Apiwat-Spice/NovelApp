@@ -16,20 +16,6 @@
 
 
   <style>
-    body {
-      font-family: 'Maven Pro', 'Prompt', 'Sarabun';
-      background-color: #fff;
-      height: 100vh;
-    }
-
-    a {
-      text-decoration: none;
-      color: inherit;
-    }
-
-    a:hover {
-      color: inherit;
-    }
     .bd-placeholder-img {
       font-size: 1.125rem;
       text-anchor: middle;
@@ -70,7 +56,7 @@
     <div class="px-3 py-2 bg-dark text-white">
       <div class="container">
         <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-          <a href="/index" class="d-flex align-items-center my-2 my-lg-0 me-lg-auto text-white text-decoration-none">
+          <a href="/" class="d-flex align-items-center my-2 my-lg-0 me-lg-auto text-white text-decoration-none">
             <i class="fa-solid fa-book-quran fa-4x"></i>
             <h3>Novel Website</h3>
           </a>
@@ -128,6 +114,12 @@
   <div class="container">
     <main>
       <div class="row g-5">
+        <div class="col-md-5 col-lg-4 order-md-last">
+          <h4 class="d-flex justify-content-between align-items-center mb-3">
+            <span class="text-primary">Your Pic</span>
+          </h4>
+          <p>pic here</p>
+        </div>
         <div class="col-md-7 col-lg-8">
           <h4 class="mb-3"><i class="fa-solid fa-book-open-reader mx-auto mb-3"></i> Add Novel</h4>
           <form class="needs-validation" novalidate action="/addNovel" method="POST">

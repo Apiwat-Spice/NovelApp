@@ -91,6 +91,9 @@
     a:hover {
       color: inherit;
     }
+    p{
+      color: #000;
+    }
   </style>
 </head>
 
@@ -155,8 +158,17 @@
     </h2>
 
     <div id="content">
-      <%= chapter.content %>
+  <% if (locked) { %>
+    <div class="text-center p-4 border rounded" style="background:#f8f9fa;">
+      <p>This chapter costs <strong><%= chapter.cost %></strong> coins to unlock.</p>
+      <form method="POST" action="/chapter/<%= chapter.chapter_id %>/unlock">
+        <button type="submit" class="btn btn-primary">Unlock Chapter</button>
+      </form>
     </div>
+  <% } else { %>
+    <%= chapter.content %>
+  <% } %>
+</div>
 
     <div class="d-flex justify-content-between mt-3">
       <% if (prevChapter) { %>

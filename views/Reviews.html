@@ -92,42 +92,29 @@
           <div class="container d-flex flex-wrap justify-content-between">
             <div class="leftside row gx-5">
               <div class="col-12 col-lg-auto mb-2 mb-lg-0 me-lg-auto text-black "><a href="/addNovel">เพิ่มนิยาย</a></div>
-              <div class="col-12 col-lg-auto mb-2 mb-lg-0 me-lg-auto text-black fw-bold"><a href="/YourNovel">แก้ไขนิยาย</a></div>
-              <div class="col-12 col-lg-auto mb-2 mb-lg-0 me-lg-auto text-black"><a href="/Reviews">ดูรีวิว</a></div>
+              <div class="col-12 col-lg-auto mb-2 mb-lg-0 me-lg-auto text-black "><a href="/YourNovel">แก้ไขนิยาย</a></div>
+              <div class="col-12 col-lg-auto mb-2 mb-lg-0 me-lg-auto text-black fw-bold"><a href="/Reviews">ดูรีวิว</a></div>
             </div>
-        <div class="text-end">
-          <% if (loggedIn) { %>
-            <a href="/logout" class="btn btn-danger">
-              <i class="fa-solid fa-right-from-bracket"></i> Logout
-            </a>
-          <% } else { %>
-            <a href="/login" class="btn btn-light text-dark me-2">Login</a>
-            <a href="/register" class="btn btn-primary">Sign-up</a>
-          <% } %>
-        </div>
+            <div class="text-end">
+              <form action="/auth/logout" method="POST" class="button gap-3">
+                <button type="submit" class="btn btn-danger">
+                  <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </button>
+                <button type="button" class="btn btn-light text-dark me-2"><a href="/login">Login</a></button>
+                <button type="button" class="btn btn-primary"><a href="/register">Sign-up</a></button>
+              </form>
+            </div>
           </div>
         </div>
       </header>
-  <main class="container mt-4">
-    <div class="row">
-      <% if (data && data.length > 0) { %>
-        <% data.forEach(novel => { %>
-          <div class="col-md-4 mb-3">
-            <div class="card h-100">
-              <img src="<%= novel.cover_url %>" class="card-img-top" alt="<%= novel.title %>">
-              <div class="card-body d-flex flex-column">
-                <h5 class="card-title"><%= novel.title %></h5>
-                <p class="card-text"><small class="text-muted">By <%= novel.author_name %></small></p>
-                <a href="/read/<%= novel.novel_id %>" class="btn btn-primary mt-auto">Read</a>
-              </div>
-            </div>
-          </div>
-        <% }) %>
-      <% } else { %>
-        <p>No novels found.</p>
-      <% } %>
-    </div>
-  </main>
+  <div class="container">
+    <main>
+      <div class="row g-5">
+
+        
+      </div>
+    </main>
+  </div>
 
 
   <script src="/docs/5.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>

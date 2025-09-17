@@ -38,19 +38,7 @@ router.get('/login', isLoggedIn, (req, res) => {
 router.get('/addNovel', isLoggedIn, (req, res) => {
   res.render('addNovel', { message: '' })
 })
-router.get('/YourNovel',isLoggedIn,(req,res)=>{
-const userId = req.user.user_id;
-console.log(userId);
 
-db.query(
-  "SELECT * FROM novels WHERE user_id = ? ORDER BY title ASC",
-  [userId],
-  (err, results) => {
-    if (err) return res.render('index', { data: [], user: req.user });
-    res.render('YourNovel', { data: results, user: req.user });
-  }
-);
-})
 router.get('/profile', isLoggedIn, (req, res) => {
   const userId = req.user.user_id;
 
@@ -73,7 +61,7 @@ router.get('/profile', isLoggedIn, (req, res) => {
 
     // Query ข้อมูล user ครบทุกฟิลด์
     const userSql = `SELECT * FROM users WHERE user_id = ?`;
-    
+
     db.query(userSql, [userId], (err2, userResults) => {
       if (err2) {
         console.error(err2);
@@ -86,34 +74,6 @@ router.get('/profile', isLoggedIn, (req, res) => {
         commentCount    // จำนวนคอมเมนต์
       });
     });
-  });
-});
-
-
-router.get('/Reviews', isLoggedIn, (req, res) => {
-  const userId = req.user.user_id;
-
-  const sql = `
-    SELECT 
-      c.comment_id,
-      c.content       AS comment_content,
-      c.created_at    AS comment_date,
-      ch.chapter_id,
-      ch.chapter_number,
-      n.novel_id,
-      n.title         AS novel_title,
-      u.username      AS commenter
-    FROM comments c
-    JOIN chapters ch ON c.chapter_id = ch.chapter_id
-    JOIN novels n ON ch.novel_id = n.novel_id
-    JOIN users u ON c.user_id = u.user_id
-    WHERE n.user_id = ?
-    ORDER BY n.title ASC, ch.chapter_number ASC, c.created_at DESC
-  `;
-
-  db.query(sql, [userId], (err, results) => {
-    if (err) return res.render('index', { data: [], user: req.user });
-    res.render('Reviews', { data: results, user: req.user });
   });
 });
 router.get('/novel/:id/addChapter', isLoggedIn, (req, res) => {
@@ -129,123 +89,137 @@ router.get('/novel/:id/addChapter', isLoggedIn, (req, res) => {
 
 // อ่าน novel + chapters
 router.get('/read/:id', isLoggedIn, (req, res) => {
-  const id = req.params.id;
+  const novelId = req.params.id;
+  const user = req.user;
 
-  db.query("SELECT * FROM novels WHERE novel_id = ?", [id], (err, novelResults) => {
+  db.query("SELECT * FROM novels WHERE novel_id = ?", [novelId], (err, novelResults) => {
     if (err || novelResults.length === 0) return res.send("Novel not found");
 
     const novel = novelResults[0];
 
-    db.query("SELECT * FROM chapters WHERE novel_id = ? ORDER BY chapter_number ASC", [id], (err, chapterResults) => {
+    db.query("SELECT * FROM chapters WHERE novel_id = ? ORDER BY chapter_number ASC", [novelId], (err, chapterResults) => {
       if (err) {
         console.error(err);
-        chapterResults = [];
+        return res.send("Error loading chapters");
       }
 
-      res.render('readNovel', { novel: novel, chapters: chapterResults, user: req.user });
+      if (!user) {
+        // ถ้าไม่ได้ล็อกอิน → ทุกตอนที่ cost > 0 ให้ locked = true
+        const chaptersWithLock = chapterResults.map(ch => ({
+          ...ch,
+          locked: ch.cost > 0
+        }));
+        return res.render('readNovel', { novel, chapters: chaptersWithLock, user: null });
+      }
+
+      // ถ้า login → เช็คว่าผู้ใช้ unlock ตอนอะไรแล้ว
+      db.query(
+        "SELECT chapter_number FROM user_progress WHERE user_id=? AND novel_id=? AND unlocked=1",
+        [user.user_id, novelId],
+        (err2, progressResults) => {
+          if (err2) {
+            console.error(err2);
+            return res.send("Error checking progress");
+          }
+
+          const unlockedChapters = progressResults.map(r => r.chapter_number);
+
+          const chaptersWithLock = chapterResults.map(ch => ({
+            ...ch,
+            locked: ch.cost > 0 && !unlockedChapters.includes(ch.chapter_number)
+          }));
+
+          res.render('readNovel', { novel, chapters: chaptersWithLock, user });
+        }
+      );
     });
   });
 });
+
 
 // logout
 router.get('/logout', authController.logout);
 
 router.get('/chapter/:id', isLoggedIn, (req, res) => {
-    const chapterId = req.params.id;
-    const user = req.user;
+  const chapterId = req.params.id;
+  const user = req.user;
 
-    // Fetch chapter details including cost
-    db.query("SELECT * FROM chapters WHERE chapter_id = ?", [chapterId], (err, results) => {
-        if (err || results.length === 0) return res.send("Chapter not found");
+  // Get chapter info
+  db.query("SELECT * FROM chapters WHERE chapter_id=?", [chapterId], (err, results) => {
+    if (err || results.length === 0) return res.send("Chapter not found");
+    const chapter = results[0];
 
-        const chapter = results[0];
+    // Get novel title
+    db.query("SELECT title FROM novels WHERE novel_id=?", [chapter.novel_id], (err2, novelRes) => {
+      const novelName = novelRes[0].title;
 
-        // Check if chapter costs coins
-        const chapterCost = chapter.cost || 0;
+      // Get comments
+      db.query(`
+                SELECT comments.*, users.username 
+                FROM comments 
+                JOIN users ON comments.user_id = users.user_id 
+                WHERE chapter_id=? 
+                ORDER BY created_at DESC
+            `, [chapterId], (err3, comments) => {
 
-        // Check if user has already unlocked this chapter
-        db.query(
-            "SELECT unlocked FROM user_progress WHERE user_id=? AND novel_id=? AND chapter_number=?",
-            [user.user_id, chapter.novel_id, chapter.chapter_number],
-            (err2, progressRes) => {
-                let unlocked = progressRes.length > 0 ? progressRes[0].unlocked : false;
 
-                if (!unlocked && chapterCost > 0) {
-                    // Chapter is locked and costs coins
-                    db.query("SELECT coins FROM users WHERE user_id=?", [user.user_id], (err3, userRes) => {
-                        if (err3) return res.send("Database error");
-                        const userCoins = userRes[0].coins;
 
-                        if (userCoins < chapterCost) {
-                            return res.send(`You need ${chapterCost} coins to unlock this chapter.`);
-                        }
+        // Find prev/next chapters
+        db.query("SELECT chapter_id FROM chapters WHERE novel_id=? AND chapter_number<? ORDER BY chapter_number DESC LIMIT 1",
+          [chapter.novel_id, chapter.chapter_number],
+          (err4, prevRes) => {
+            const prevChapter = prevRes.length > 0 ? prevRes[0].chapter_id : null;
 
-                        // Deduct coins from user
-                        const newCoins = userCoins - chapterCost;
-                        db.query("UPDATE users SET coins=? WHERE user_id=?", [newCoins, user.user_id], (err4) => {
-                            if (err4) return res.send("Failed to update coins");
+            db.query("SELECT chapter_id FROM chapters WHERE novel_id=? AND chapter_number>? ORDER BY chapter_number ASC LIMIT 1",
+              [chapter.novel_id, chapter.chapter_number],
+              (err5, nextRes) => {
+                const nextChapter = nextRes.length > 0 ? nextRes[0].chapter_id : null;
 
-                            // Record coin transaction
-                            const sqlCoin = "INSERT INTO coin_payments (user_id, type, method, amount_coin) VALUES (?, 'spend', 'coin_to_chapter', ?)";
-                            db.query(sqlCoin, [user.user_id, chapterCost], (err5) => {
-                                if (err5) console.error(err5);
+                // Check if chapter is locked
+                if (chapter.cost > 0) {
+                  db.query(
+                    "SELECT unlocked FROM user_progress WHERE user_id=? AND novel_id=? AND chapter_number=?",
+                    [user.user_id, chapter.novel_id, chapter.chapter_number],
+                    (err6, progRes) => {
+                      const locked = !(progRes.length > 0 && progRes[0].unlocked);
 
-                                // Mark chapter as unlocked
-                                db.query(
-                                    "INSERT INTO user_progress (user_id, novel_id, chapter_number, unlocked) VALUES (?, ?, ?, ?)",
-                                    [user.user_id, chapter.novel_id, chapter.chapter_number, true],
-                                    (err6) => {
-                                        if (err6) console.error(err6);
-                                        renderChapter();
-                                    }
-                                );
-                            });
-                        });
-                    });
+                      res.render("readChapter", {
+                        chapter,
+                        novelName,
+                        prevChapter,
+                        nextChapter,
+                        comments,
+                        user,
+                        locked,
+                        loggedIn: true
+                      });
+                    }
+                  );
                 } else {
-                    // Already unlocked or free chapter
-                    renderChapter();
+                  res.render("readChapter", {
+                    chapter,
+                    novelName,
+                    prevChapter,
+                    nextChapter,
+                    comments,
+                    user,
+                    locked: false,
+                    loggedIn: true
+                  });
                 }
-
-                function renderChapter() {
-                    // Fetch novel name
-                    db.query("SELECT title FROM novels WHERE novel_id=?", [chapter.novel_id], (err7, novelRes) => {
-                        if (err7 || novelRes.length === 0) return res.send("Novel not found");
-                        const novelName = novelRes[0].title;
-
-                        // Fetch previous and next chapter IDs
-                        const sqlPrev = "SELECT chapter_id FROM chapters WHERE novel_id=? AND chapter_number<? ORDER BY chapter_number DESC LIMIT 1";
-                        const sqlNext = "SELECT chapter_id FROM chapters WHERE novel_id=? AND chapter_number>? ORDER BY chapter_number ASC LIMIT 1";
-
-                        db.query(sqlPrev, [chapter.novel_id, chapter.chapter_number], (err8, prevRes) => {
-                            db.query(sqlNext, [chapter.novel_id, chapter.chapter_number], (err9, nextRes) => {
-                                const prevChapter = prevRes.length > 0 ? prevRes[0].chapter_id : null;
-                                const nextChapter = nextRes.length > 0 ? nextRes[0].chapter_id : null;
-
-                                // Fetch comments for this chapter
-                                db.query(
-                                    `SELECT comments.*, users.username 
-                                     FROM comments JOIN users ON comments.user_id=users.user_id 
-                                     WHERE chapter_id=? ORDER BY created_at DESC`,
-                                    [chapterId],
-                                    (err10, comments) => {
-                                        if (err10) comments = [];
-                                        res.render('readChapter', { chapter, novelName, prevChapter, nextChapter, comments, user });
-                                    }
-                                );
-                            });
-                        });
-                    });
-                }
-            }
-        );
+              });
+          });
+      });
     });
+  });
 });
+
 
 // Post routes
 router.post("/addNovel", isLoggedIn, authController.addNovel);
 router.post('/novel/:id/addChapter', isLoggedIn, authController.addChapter);
-router.post("/chapter/:id/comment",isLoggedIn, authController.addComment);
-router.post("/coin",isLoggedIn, authController.coin);
+router.post("/chapter/:id/comment", isLoggedIn, authController.addComment);
+router.post("/coin", isLoggedIn, authController.coin);
+router.post('/chapter/:id/unlock', isLoggedIn, authController.unlock);
 
 module.exports = router;
