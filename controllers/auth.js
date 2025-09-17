@@ -152,20 +152,44 @@ exports.addNovel = (req, res) => {
 exports.addChapter = (req, res) => {
     console.log(req.body);
 
-    const id = req.params.id;
-    const chapter_number = req.body.chapter_number
+    const id = req.params.id; // novel_id
+    const chapter_name = req.body.chapter_name;
     const content = req.body.content;
-    let cost = 0;
-    if (chapter_number >= 4) cost = 3;
+    const is_adult = req.body.Check18Content === "on" ? 1 : 0;
 
-    const sql = `INSERT INTO chapters (novel_id, chapter_number, content, cost)
-             VALUES (?, ?, ?, ?)`;
 
-    db.query(sql, [id, chapter_number, content, cost || null], (err, result) => {
+    // หาเลขตอนล่าสุดของ novel_id นี้
+    const getChapterNumberSql = `
+        SELECT COALESCE(MAX(chapter_number), 0) AS lastChapter 
+        FROM chapters 
+        WHERE novel_id = ?
+    `;
+
+    db.query(getChapterNumberSql, [id], (err, rows) => {
         if (err) return res.send(err);
-        res.redirect(`/read/${id}`);
+
+        // ตอนใหม่ = ตอนล่าสุด + 1
+        const chapter_number = rows[0].lastChapter + 1;
+
+        // คำนวณ cost
+        let cost = 0;
+        if (chapter_number >= 4) cost = 3;
+
+        // insert ตอนใหม่
+        const insertSql = `
+            INSERT INTO chapters (novel_id, chapter_number, chapter_name, content, is_adult, cost)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `;
+
+        db.query(insertSql, [id, chapter_number, chapter_name || null, content, is_adult, cost], (err2, result) => {
+            if (err2) return res.send(err2);
+
+            console.log(`Chapter ${chapter_number} inserted for novel ${id}`);
+            res.redirect(`/read/${id}`);
+        });
     });
 };
+
 exports.addComment = (req, res) => {
     const chapterId = req.params.id;
     const userId = req.user.user_id;
