@@ -257,6 +257,8 @@ router.get('/chapter/:id', isLoggedIn, (req, res) => {
 router.post("/addNovel", isLoggedIn, authController.addNovel);
 router.post('/novel/:id/addChapter', isLoggedIn, authController.addChapter);
 router.post("/chapter/:id/comment",isLoggedIn, authController.addComment);
+router.post("/chapter/:id/unlock",isLoggedIn, authController.unlock)
 router.post("/coin",isLoggedIn, authController.coin);
+router.post("/chapter/:id/like", isLoggedIn, authController.likeChapter);
 
 module.exports = router;

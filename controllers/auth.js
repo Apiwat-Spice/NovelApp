@@ -227,3 +227,51 @@ exports.coin = (req,res) =>{
         });
     })
 };
+
+exports.unlock = (req, res) => {
+    console.log("i do unlock");
+    
+    const chapterId = req.params.id;
+    const user = req.user;
+
+    db.query("SELECT * FROM chapters WHERE chapter_id=?", [chapterId], (err, results) => {
+        if (err || results.length === 0) return res.send("Chapter not found");
+        const chapter = results[0];
+
+        db.query("SELECT coins FROM users WHERE user_id=?", [user.user_id], (err2, userRes) => {
+            const userCoins = userRes[0].coins;
+            if (userCoins < chapter.cost) {
+                return res.send("Not enough coins");
+            }
+
+            // Minus coin
+            db.query("UPDATE users SET coins = coins - ? WHERE user_id=?", [chapter.cost, user.user_id]);
+
+            // transaction
+            db.query("INSERT INTO coin_payments (user_id, type, method, amount_coin) VALUES (?, 'spend', 'coin_to_chapter', ?)",
+                [user.user_id, chapter.cost]);
+
+            // Mark unlocked
+            db.query("INSERT INTO user_progress (user_id, novel_id, chapter_number, unlocked) VALUES (?, ?, ?, 1) ON DUPLICATE KEY UPDATE unlocked=1",
+                [user.user_id, chapter.novel_id, chapter.chapter_number]);
+
+            res.redirect(`/chapter/${chapterId}`);
+        });
+    });
+};
+exports.likeChapter = (req, res) => {
+    const chapterId = req.params.id;
+    const userId = req.user.user_id;
+
+    const sql = `
+        INSERT INTO chapter_likes (chapter_id, user_id)
+        VALUES (?, ?)
+        ON DUPLICATE KEY UPDATE created_at = NOW()
+    `;
+
+    db.query(sql, [chapterId, userId], (err, result) => {
+        if (err) return res.status(500).send("Failed to like chapter");
+
+        res.redirect(`/chapter/${chapterId}`); // reload chapter page
+    });
+};
