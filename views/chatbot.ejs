@@ -88,8 +88,9 @@
     </div>
 
   </header>
+  <div class="d-flex justify-content-center"><i class="fa-solid fa-robot fa-5x"></i><i class="fa-regular fa-message fa-3.5x"></i></div>
   <section>
-    <div class="container py-5">
+    <div class="container py-2">
       <div id="chatbot" class="border rounded-3 shadow p-3" style="max-width: 500px; margin: auto; background-color: #f9f9f9;">
         <div id="messages" style="height: 300px; overflow-y: auto; padding: 10px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff;"></div>
         <div class="input-group mt-3">
@@ -116,7 +117,7 @@
     })
     .then(res => res.json())
     .then(data => {
-      messages.innerHTML += `<div style="margin-bottom: 10px;"><strong>Bot:</strong> ${data.reply}</div>`;
+      messages.innerHTML += `<div style="margin-bottom: 10px;"><strong>Chat-bot:</strong> ${data.reply}</div>`;
       messages.scrollTop = messages.scrollHeight; // เลื่อนลงอัตโนมัติ
     });
 

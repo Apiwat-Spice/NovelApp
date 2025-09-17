@@ -8,16 +8,13 @@
   </title>
 
   <!-- Bootstrap & Font Awesome -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400..900&family=Prompt:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Sarabun:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap"
-    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400..900&family=Prompt:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Sarabun:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet">
 
   <style>
     body.light {
@@ -114,67 +111,72 @@
             <h3 class="ms-2">Novel Website</h3>
           </a>
           <ul class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
-            <li><a href="/index" class="nav-link text-secondary"><i
-                  class="fa-solid fa-house d-block mx-auto mb-1 fa-2x"></i>Home</a></li>
-            <li><a href="/addNovel" class="nav-link text-white"><i
-                  class="fa-solid fa-pen-nib d-block mx-auto mb-1 fa-2x"></i>Create Novel</a></li>
-            <li><a href="/coin" class="nav-link text-white"><i
-                  class="fa-solid fa-coins d-block mx-auto mb-1 fa-2x"></i>Coins</a></li>
-                  <li><a href="/chatbot" class="nav-link text-white"><i class="fa-solid fa-comments-dollar d-block mx-auto mb-1 fa-2x"></i>Chatbot</a></li>
-            <li><a href="/profile" class="nav-link text-white"><i
-                  class="fa-solid fa-user d-block mx-auto mb-1 fa-2x"></i>Profile</a></li>
+            <li><a href="/index" class="nav-link text-secondary"><i class="fa-solid fa-house d-block mx-auto mb-1 fa-2x"></i>Home</a></li>
+            <li><a href="/addNovel" class="nav-link text-white"><i class="fa-solid fa-pen-nib d-block mx-auto mb-1 fa-2x"></i>Create Novel</a></li>
+            <li><a href="/coin" class="nav-link text-white"><i class="fa-solid fa-coins d-block mx-auto mb-1 fa-2x"></i>Coins</a></li>
+            <li><a href="/chatbot" class="nav-link text-white"><i class="fa-solid fa-comments-dollar d-block mx-auto mb-1 fa-2x"></i>Chatbot</a></li>
+            <li><a href="/profile" class="nav-link text-white"><i class="fa-solid fa-user d-block mx-auto mb-1 fa-2x"></i>Profile</a></li>
           </ul>
         </div>
       </div>
     </div>
 
-    <div class="px-3 py-2 border-bottom mb-3">
-      <div class="container d-flex flex-wrap justify-content-end">
-        <div class="text-end">
-          <% if (loggedIn) { %>
-            <a href="/logout" class="btn btn-danger"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
-            <% } else { %>
-              <a href="/login" class="btn btn-light text-dark me-2">Login</a>
-              <a href="/register" class="btn btn-primary">Sign-up</a>
-              <% } %>
-        </div>
+    <div class="px-3 py-2 mb-3 d-flex align-items-centter gap-2 flex-wrap justify-content-between">
+      <!-- Controls + Login/Logout ทั้งหมดในแถวเดียว -->
+      <div class="text_custom d-flex flex-row gap-3">
+      <a href="/read/<%= chapter.novel_id %>" class="btn btn-primary"><i class="fa-solid fa-door-open"></i> Back</a>
+      <button class="btn" style="background-color: rgb(0, 133, 22); color: white;" onclick="changeFontSize(2)">
+        <i class="fa-solid fa-a"></i><i class="fa-solid fa-plus"></i>
+      </button>
+      <button class="btn" style="background-color: rgb(150, 30, 0); color: white;" onclick="changeFontSize(-2)">
+        <i class="fa-solid fa-a"></i><i class="fa-solid fa-minus"></i>
+      </button>
+      <button class="btn" style="background-color: rgb(189, 189, 189); color: rgb(0, 0, 0);" onclick="setTheme('light')">
+        <i class="fa-solid fa-sun"></i>
+      </button>
+      <button class="btn" style="background-color: rgb(0, 0, 0); color: rgb(255, 255, 255);" onclick="setTheme('dark')">
+        <i class="fa-solid fa-moon"></i>
+      </button>
+      <button class="btn" style="background-color: #ffde89; color: rgb(252, 142, 45);" onclick="setTheme('sepia')">
+        <i class="fa-solid fa-cloud"></i>
+      </button>
+      <select id="fontSelect" onchange="changeFont(this.value)" class="dropdown btn btn-secondary dropdown-toggle rounded btn-secondary " style="background-color: #787878; color: rgb(255, 255, 255);">
+        <option value="serif" class="btn rounded btn-secondary text-start dropdown-item" >Serif</option>
+        <option value="sans-serif" class="rounded btn-secondary text-start dropdown-item">Sans-Serif</option>
+        <option value="monospace" class="rounded btn-secondary text-start dropdown-item">Monospace</option>
+        <option value="Georgia" class="rounded btn-secondary text-start dropdown-item">Georgia</option>
+        <option value="Courier New" class="rounded btn-secondary text-start dropdown-item">Courier New</option>
+        <option value="Sarabun" class="rounded btn-secondary text-start dropdown-item">Sarabun</option>
+        <option value="Prompt" class="rounded btn-secondary text-start dropdown-item">Prompt</option>
+        <option value="Maven Pro" class="rounded btn-secondary text-start dropdown-item">Maven Pro</option>
+      </select>
+      <% if (user) { %>
+        <form method="POST" action="/chapter/<%= chapter.chapter_id %>/like" class="d-flex align-items-center gap-1">
+          <button type="submit" class="btn btn-outline-primary">
+            <i class="fa-solid fa-thumbs-up"></i> Like
+          </button>
+          <span><%= chapterLikes %> Likes</span>
+        </form>
+        <% } else { %>
+        <span class="text-muted">Login to like this chapter (<%= chapterLikes %> Likes)</span>
+        <% } %>
+      </div>
+      <div class="logout">
+        <% if (loggedIn) { %>
+        <a href="/logout" class="btn btn-danger"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        <% } else { %>
+        <a href="/login" class="btn btn-light text-dark">Login</a>
+        <a href="/register" class="btn btn-primary">Sign-up</a>
+        <% } %>
       </div>
     </div>
+
   </header>
 
   <!-- Reader -->
   <div id="reader" class="container mt-4">
 
-    <!-- Controls -->
-    <div id="controls">
-      <a href="/read/<%= chapter.novel_id %>" class="btn btn-primary">← Back</a>
-      <button class="btn btn-secondary" onclick="changeFontSize(1)">A+</button>
-      <button class="btn btn-secondary" onclick="changeFontSize(-1)">A-</button>
-      <button class="btn btn-secondary" onclick="setTheme('light')">Light</button>
-      <button class="btn btn-secondary" onclick="setTheme('dark')">Dark</button>
-      <button class="btn btn-secondary" onclick="setTheme('sepia')">Sepia</button>
-      <select id="fontSelect" onchange="changeFont(this.value)">
-        <option value="serif">Serif</option>
-        <option value="sans-serif">Sans-Serif</option>
-        <option value="monospace">Monospace</option>
-        <option value="Georgia">Georgia</option>
-        <option value="Courier New">Courier New</option>
-      </select>
-      <div class="mt-0 d-flex align-items-center gap-1">
-        <% if (user) { %>
-          <form method="POST" action="/chapter/<%= chapter.chapter_id %>/like" style="display:inline">
-            <button type="submit" class="btn btn-outline-primary">
-              <i class="fa-solid fa-thumbs-up"></i> Like
-            </button>
-          </form>
-          <% } else { %>
-            <span class="text-muted">Login to like this chapter</span>
-            <% } %>
-              <span>
-                <%= chapterLikes %> Likes
-              </span>
-      </div>
-    </div>
+
 
     <!-- Chapter Title -->
     <h2>Chapter <%= chapter.chapter_number %>: <%= chapter.title %>
@@ -183,19 +185,19 @@
     <!-- Chapter Content / Locked Logic -->
     <div id="content">
       <% if (chapter.locked) { %>
-  <div class="text-center p-4 border rounded" style="background:#f8f9fa;">
-    <p>This chapter costs <strong><%= chapter.cost %></strong> coins to unlock.</p>
-    <% if (!user || user.is_premium === 0) { %>
-      <!-- เฉพาะผู้ใช้ที่ไม่มี premium หรือไม่ได้ล็อกอินเท่านั้นถึงเห็นปุ่ม Unlock -->
-      <form method="POST" action="/chapter/<%= chapter.chapter_id %>/unlock">
-        <button type="submit" class="btn btn-primary">Unlock Chapter</button>
-      </form>
-    <% } %>
-  </div>
-<% } else { %>
-  <!-- แสดงเนื้อหาเลย -->
-  <%= chapter.content %>
-<% } %>
+      <div class="text-center p-4 border rounded" style="background:#f8f9fa;">
+        <p>This chapter costs <strong><%= chapter.cost %></strong> coins to unlock.</p>
+        <% if (!user || user.is_premium === 0) { %>
+        <!-- เฉพาะผู้ใช้ที่ไม่มี premium หรือไม่ได้ล็อกอินเท่านั้นถึงเห็นปุ่ม Unlock -->
+        <form method="POST" action="/chapter/<%= chapter.chapter_id %>/unlock">
+          <button type="submit" class="btn btn-primary">Unlock Chapter</button>
+        </form>
+        <% } %>
+      </div>
+      <% } else { %>
+      <!-- แสดงเนื้อหาเลย -->
+      <%= chapter.content %>
+      <% } %>
 
 
     </div>
@@ -203,53 +205,52 @@
     <!-- Navigation -->
     <div class="d-flex justify-content-between mt-3">
       <% if (prevChapter) { %>
-        <a href="/chapter/<%= prevChapter %>" class="btn btn-secondary">⬅ Previous</a>
-        <% } else { %>
-          <span></span>
-          <% } %>
+      <a href="/chapter/<%= prevChapter %>" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Previous</a>
+      <% } else { %>
+      <span></span>
+      <% } %>
 
-            <% if (nextChapter) { %>
-              <a href="/chapter/<%= nextChapter %>" class="btn btn-secondary">Next ➡</a>
-              <% } else { %>
-                <span></span>
-                <% } %>
+      <% if (nextChapter) { %>
+      <a href="/chapter/<%= nextChapter %>" class="btn btn-secondary">Next <i class="fa-solid fa-arrow-right"></i></a>
+      <% } else { %>
+      <span></span>
+      <% } %>
     </div>
 
     <hr>
 
 
     <!-- Comments -->
-    <h3>Comments</h3>
+    <h3>Comments <i class="fa-solid fa-message"></i></h3>
     <div>
       <% if (comments.length===0) { %>
-        <p>No comments yet.</p>
-        <% } else { %>
-          <% comments.forEach(c=> { %>
-            <div>
-              <strong>
-                <%= c.username %>
-              </strong>: <%= c.content %>
-                <small>(<%= new Date(c.created_at).toLocaleString() %>)</small>
-            </div>
-            <% }) %>
-              <% } %>
+      <p>No comments yet.</p>
+      <% } else { %>
+      <% comments.forEach(c=> { %>
+      <div>
+        <strong>
+          <%= c.username %>
+        </strong>: <%= c.content %>
+        <small>(<%= new Date(c.created_at).toLocaleString() %>)</small>
+      </div>
+      <% }) %>
+      <% } %>
     </div>
 
     <!-- Comment Form -->
     <div class="comment-section mt-4">
       <% if (user) { %>
-        <form method="POST" action="/chapter/<%= chapter.chapter_id %>/comment" class="comment-form">
-          <div class="mb-3">
-            <textarea name="content" class="form-control" rows="4" placeholder="Write your comment..."
-              required></textarea>
-          </div>
-          <button type="submit" class="btn btn-primary">Post Comment</button>
-        </form>
-        <% } else { %>
-          <p class="text-muted"><a href="/login" class="text-decoration-none">Login</a> to comment.</p>
-          <% } %>
+      <form method="POST" action="/chapter/<%= chapter.chapter_id %>/comment" class="comment-form">
+        <div class="mb-3">
+          <textarea name="content" class="form-control" rows="4" placeholder="Write your comment..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Post Comment</button>
+      </form>
+      <% } else { %>
+      <p class="text-muted"><a href="/login" class="text-decoration-none">Login</a> to comment.</p>
+      <% } %>
     </div>
-
+    <br>
   </div>
 
   <!-- Scripts -->
@@ -272,11 +273,16 @@
       document.getElementById("content").style.fontFamily = fontFamily;
     }
 
-    window.onload = function () {
+    window.onload = function() {
       const savedFont = localStorage.getItem("fontSize");
       const savedTheme = localStorage.getItem("theme");
-      if (savedFont) { fontSize = parseInt(savedFont); document.getElementById("content").style.fontSize = fontSize + "px"; }
-      if (savedTheme) { document.body.className = savedTheme; }
+      if (savedFont) {
+        fontSize = parseInt(savedFont);
+        document.getElementById("content").style.fontSize = fontSize + "px";
+      }
+      if (savedTheme) {
+        document.body.className = savedTheme;
+      }
     }
   </script>
 
