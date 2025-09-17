@@ -152,20 +152,44 @@ exports.addNovel = (req, res) => {
 exports.addChapter = (req, res) => {
     console.log(req.body);
 
-    const id = req.params.id;
-    const chapter_number = req.body.chapter_number
+    const id = req.params.id; // novel_id
+    const chapter_name = req.body.chapter_name;
     const content = req.body.content;
-    let cost = 0;
-    if (chapter_number >= 4) cost = 3;
+    const is_adult = req.body.Check18Content === "on" ? 1 : 0;
 
-    const sql = `INSERT INTO chapters (novel_id, chapter_number, content, cost)
-             VALUES (?, ?, ?, ?)`;
 
-    db.query(sql, [id, chapter_number, content, cost || null], (err, result) => {
+    // หาเลขตอนล่าสุดของ novel_id นี้
+    const getChapterNumberSql = `
+        SELECT COALESCE(MAX(chapter_number), 0) AS lastChapter 
+        FROM chapters 
+        WHERE novel_id = ?
+    `;
+
+    db.query(getChapterNumberSql, [id], (err, rows) => {
         if (err) return res.send(err);
-        res.redirect(`/read/${id}`);
+
+        // ตอนใหม่ = ตอนล่าสุด + 1
+        const chapter_number = rows[0].lastChapter + 1;
+
+        // คำนวณ cost
+        let cost = 0;
+        if (chapter_number >= 4) cost = 3;
+
+        // insert ตอนใหม่
+        const insertSql = `
+            INSERT INTO chapters (novel_id, chapter_number, chapter_name, content, is_adult, cost)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `;
+
+        db.query(insertSql, [id, chapter_number, chapter_name || null, content, is_adult, cost], (err2, result) => {
+            if (err2) return res.send(err2);
+
+            console.log(`Chapter ${chapter_number} inserted for novel ${id}`);
+            res.redirect(`/read/${id}`);
+        });
     });
 };
+
 exports.addComment = (req, res) => {
     const chapterId = req.params.id;
     const userId = req.user.user_id;
@@ -184,52 +208,22 @@ exports.logout = (req, res) => {
     res.clearCookie('jwt'); // เคลียร์ JWT cookie
     res.redirect('/login');
 };
-exports.coin = (req, res) => {
+exports.coin = (req,res) =>{
     const amount_coin = req.body.amount;
     const amount_bath = req.body.amount;
     const userId = req.user.user_id;
     const earn = "earn"
     const bath_to_coin = "bath_to_coin"
-
+    
     //API Payments
-
+    
     const sql = "INSERT INTO coin_payments (user_id, type, method, amount_coin, amount_bath) VALUES (?, ?, ?, ?, ?)";
-    db.query(sql, [userId, earn, bath_to_coin, amount_coin, amount_bath], (err, result) => {
+    db.query(sql,[userId,earn,bath_to_coin,amount_coin,amount_bath],(err,result)=>{
         if (err) return res.send("Failed to โอนตังค์");
         const sqlUpdate = "UPDATE users SET coins = coins + ? WHERE user_id = ?";
         db.query(sqlUpdate, [amount_coin, userId], (err2, result2) => {
             if (err2) return res.status(500).send("Failed to update coins");
-            res.redirect("/coin");
+        res.redirect("/coin"); 
         });
     })
-};
-
-exports.unlock = (req, res) => {
-    const chapterId = req.params.id;
-    const user = req.user;
-
-    db.query("SELECT * FROM chapters WHERE chapter_id=?", [chapterId], (err, results) => {
-        if (err || results.length === 0) return res.send("Chapter not found");
-        const chapter = results[0];
-
-        db.query("SELECT coins FROM users WHERE user_id=?", [user.user_id], (err2, userRes) => {
-            const userCoins = userRes[0].coins;
-            if (userCoins < chapter.cost) {
-                return res.send("Not enough coins");
-            }
-
-            // Minus coin
-            db.query("UPDATE users SET coins = coins - ? WHERE user_id=?", [chapter.cost, user.user_id]);
-
-            // transaction
-            db.query("INSERT INTO coin_payments (user_id, type, method, amount_coin) VALUES (?, 'spend', 'coin_to_chapter', ?)",
-                [user.user_id, chapter.cost]);
-
-            // Mark unlocked
-            db.query("INSERT INTO user_progress (user_id, novel_id, chapter_number, unlocked) VALUES (?, ?, ?, 1) ON DUPLICATE KEY UPDATE unlocked=1",
-                [user.user_id, chapter.novel_id, chapter.chapter_number]);
-
-            res.redirect(`/chapter/${chapterId}`);
-        });
-    });
 };

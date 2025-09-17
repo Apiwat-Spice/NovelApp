@@ -38,7 +38,19 @@ router.get('/login', isLoggedIn, (req, res) => {
 router.get('/addNovel', isLoggedIn, (req, res) => {
   res.render('addNovel', { message: '' })
 })
+router.get('/YourNovel',isLoggedIn,(req,res)=>{
+const userId = req.user.user_id;
+console.log(userId);
 
+db.query(
+  "SELECT * FROM novels WHERE user_id = ? ORDER BY title ASC",
+  [userId],
+  (err, results) => {
+    if (err) return res.render('index', { data: [], user: req.user });
+    res.render('YourNovel', { data: results, user: req.user });
+  }
+);
+})
 router.get('/profile', isLoggedIn, (req, res) => {
   const userId = req.user.user_id;
 
@@ -61,7 +73,7 @@ router.get('/profile', isLoggedIn, (req, res) => {
 
     // Query ข้อมูล user ครบทุกฟิลด์
     const userSql = `SELECT * FROM users WHERE user_id = ?`;
-
+    
     db.query(userSql, [userId], (err2, userResults) => {
       if (err2) {
         console.error(err2);
@@ -74,6 +86,34 @@ router.get('/profile', isLoggedIn, (req, res) => {
         commentCount    // จำนวนคอมเมนต์
       });
     });
+  });
+});
+
+
+router.get('/Reviews', isLoggedIn, (req, res) => {
+  const userId = req.user.user_id;
+
+  const sql = `
+    SELECT 
+      c.comment_id,
+      c.content       AS comment_content,
+      c.created_at    AS comment_date,
+      ch.chapter_id,
+      ch.chapter_number,
+      n.novel_id,
+      n.title         AS novel_title,
+      u.username      AS commenter
+    FROM comments c
+    JOIN chapters ch ON c.chapter_id = ch.chapter_id
+    JOIN novels n ON ch.novel_id = n.novel_id
+    JOIN users u ON c.user_id = u.user_id
+    WHERE n.user_id = ?
+    ORDER BY n.title ASC, ch.chapter_number ASC, c.created_at DESC
+  `;
+
+  db.query(sql, [userId], (err, results) => {
+    if (err) return res.render('index', { data: [], user: req.user });
+    res.render('Reviews', { data: results, user: req.user });
   });
 });
 router.get('/novel/:id/addChapter', isLoggedIn, (req, res) => {
@@ -135,7 +175,6 @@ router.get('/read/:id', isLoggedIn, (req, res) => {
     });
   });
 });
-
 
 // logout
 router.get('/logout', authController.logout);
@@ -214,12 +253,10 @@ router.get('/chapter/:id', isLoggedIn, (req, res) => {
   });
 });
 
-
 // Post routes
 router.post("/addNovel", isLoggedIn, authController.addNovel);
 router.post('/novel/:id/addChapter', isLoggedIn, authController.addChapter);
-router.post("/chapter/:id/comment", isLoggedIn, authController.addComment);
-router.post("/coin", isLoggedIn, authController.coin);
-router.post('/chapter/:id/unlock', isLoggedIn, authController.unlock);
+router.post("/chapter/:id/comment",isLoggedIn, authController.addComment);
+router.post("/coin",isLoggedIn, authController.coin);
 
 module.exports = router;
