@@ -41,7 +41,6 @@ exports.register = (req, res) => {
                 if (error) {
                     console.log(error);
                 } else {
-                    console.log(result);
                     return res.render('login', { message: "User registered" });
                 }
             });
@@ -93,14 +92,12 @@ exports.login = (req, res) => {
                     console.log("error here :" + err);
                     return res.render('index', { data: [] });
                 }
-                console.log("no error");
                 res.redirect('/index');
             });
         }
     });
 };
 exports.addNovel = (req, res) => {
-    console.log(req.body);
 
     if (!req.user) return res.redirect('/login');
     const userId = req.user.user_id;
@@ -148,7 +145,6 @@ exports.addNovel = (req, res) => {
     });
 };
 exports.addChapter = (req, res) => {
-    console.log(req.body);
 
     const id = req.params.id; // novel_id
     const chapter_name = req.body.chapter_name;
