@@ -238,6 +238,9 @@ exports.unlock = (req, res) => {
 
         // ตรวจสอบ coins
         if (req.user.coins < chap.cost) {
+            console.log(req.user.coins);
+            console.log("KUy");
+            
             return res.send('Not enough coins');
         }
 
