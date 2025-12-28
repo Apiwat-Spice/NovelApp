@@ -33,7 +33,7 @@ This project is designed to support both **Readers** and **Writers** with a comp
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-username/novel-website.git
+git clone https://github.com/your-username/NovelApp.git
 cd novel-website
 ```
 
